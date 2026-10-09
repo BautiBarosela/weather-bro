@@ -86,6 +86,7 @@ h2{font-size:17px;font-weight:800;margin:30px 0 12px}
 .leaflet-zoom-animated{transform-origin:0 0}.leaflet-zoom-anim .leaflet-zoom-animated{transition:transform .25s cubic-bezier(0,0,.25,1)}
 .leaflet-zoom-anim .leaflet-tile,.leaflet-pan-anim .leaflet-tile{transition:none}.leaflet-zoom-anim .leaflet-zoom-hide{visibility:hidden}
 .leaflet-grab{cursor:grab}.leaflet-dragging .leaflet-grab{cursor:grabbing}
+#wm .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9) saturate(.7)}
 #wm{height:340px;border-radius:16px;position:relative;overflow:hidden;margin-top:14px}
 #wh{width:100%;margin:14px 0 0;accent-color:#f2a56b}
 .lg{height:8px;border-radius:4px;margin-top:12px;background:linear-gradient(90deg,#a8dcff,#4d9cf5,#f2a56b,#ff7a45)}
@@ -251,7 +252,7 @@ const ov=$('#ov'),hh=n=>String(n).padStart(2,'0'),mn=h=>{const [a,b]=h.split(':'
 const mt=(v,a,b,g)=>`<div class="mt" style="background:linear-gradient(90deg,${g})"><i style="left:${Math.min(100,Math.max(0,(v-a)/(b-a)*100))}%"></i></div>`;
 function detail(k){const d=lastD,big=(v,l)=>`<div class="bv">${v}</div><p><b>${l}</b></p>`;
  if(k==='fl'){const x=d.feel-d.temp,a=Math.abs(Math.round(x*(U.t==='F'?1.8:1)));return['Sensación térmica',big(T(d.feel),Math.abs(x)<1.5?'Igual que la temperatura real':x<0?`${a}° más fría que el termómetro`:`${a}° más cálida que el termómetro`)+`<p>La temperatura real es ${T(d.temp)}. La sensación cambia sobre todo con el viento, que enfría, y con la humedad (${d.hum}%), que hace sentir más el calor.</p>`]}
- if(k==='w')return['Viento',big(WD(d.wind),d.wind<12?'Brisa suave':d.wind<29?'Viento moderado':d.wind<50?'Viento fuerte':'Temporal')+`<p>Máximos previstos: ${d.days.map(x=>x.date.toLocaleDateString('es-AR',{weekday:'short'})+' '+WD(x.wind)).join(' · ')}.</p><div id="wm"></div><div class="lg"></div><div class="bl"><span>suave</span><span>fuerte</span></div><input id="wh" type="range" min="0" max="24" value="0" aria-label="Hora del pronóstico"><p id="wl"><b>Ahora</b></p><p id="wr">Cargando viento…</p><small class="at">© OpenStreetMap · © CARTO · Viento: Open-Meteo</small>`];
+ if(k==='w')return['Viento',big(WD(d.wind),d.wind<12?'Brisa suave':d.wind<29?'Viento moderado':d.wind<50?'Viento fuerte':'Temporal')+`<p>Máximos previstos: ${d.days.map(x=>x.date.toLocaleDateString('es-AR',{weekday:'short'})+' '+WD(x.wind)).join(' · ')}.</p><div id="wm"></div><div class="lg"></div><div class="bl"><span>suave</span><span>fuerte</span></div><input id="wh" type="range" min="0" max="24" value="0" aria-label="Hora del pronóstico"><p id="wl"><b>Ahora</b></p><p id="wr">Cargando viento…</p><small class="at">© OpenStreetMap contributors · Viento: Open-Meteo</small>`];
  if(k==='h')return['Humedad',big(d.hum+'%',d.hum<30?'Aire seco':d.hum<60?'Confortable':d.hum<80?'Algo húmedo':'Muy húmedo')+mt(d.hum,0,100,'#f2a56b,#8fd0ff,#1668c8')+'<p>Con humedad alta el calor se siente más y cuesta más refrescarse. Con humedad baja se resecan la piel y la garganta.</p>'];
  if(k==='uv'){const u=Math.round(d.uv);return['Índice UV',big(u+' · '+UVL(d.uv),u<3?'Podés estar al aire libre sin problema':u<6?'Usá protector si vas a estar mucho al sol':u<8?'Protector, lentes y gorra':u<11?'Buscá sombra entre las 11 y las 16':'Evitá exponerte al sol')+mt(d.uv,0,11,'#4cc38a,#f2d04b,#f2a56b,#e5534b,#a56cd6')+'<p>Es el valor máximo previsto para hoy. Es más alto al mediodía y baja hacia la tarde.</p>']}
  if(k==='pr')return['Presión',big(Math.round(d.pres)+' hPa',d.pres<1005?'Baja: suele venir con nubes e inestabilidad':d.pres<1020?'Normal':'Alta: suele traer tiempo estable')+mt(d.pres,985,1040,'#8fd0ff,#1668c8,#f2a56b')+'<p>Se mide ajustada al nivel del mar, así se puede comparar entre ciudades. Lo que más importa es si sube o baja con las horas.</p>'];
@@ -266,7 +267,7 @@ function initWind(){
  const box=$('#wm'),sl=$('#wh'),ro=$('#wr'),N=7;
  if(typeof L==='undefined'){box.textContent='El mapa necesita conexión a internet.';return}
  const c=lastC,map=L.map(box,{zoomControl:false,attributionControl:false,minZoom:4,maxZoom:9}).setView([c.lat,c.lon],6);
- L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:9}).addTo(map);
+ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:9}).addTo(map);
  L.circleMarker([c.lat,c.lon],{radius:6,color:'#fff',weight:2,fillColor:'#f2a56b',fillOpacity:1}).addTo(map);
  let G=null,hr=0,dem=false,P=[],raf,tm;
  const cv=document.createElement('canvas'),cx2=cv.getContext('2d');cv.style.cssText='position:absolute;inset:0;pointer-events:none;z-index:450';box.appendChild(cv);
