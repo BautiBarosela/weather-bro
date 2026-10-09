@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Weather Bro</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+@property --a{syntax:'<color>';inherits:false;initial-value:#1668c8}
+@property --b{syntax:'<color>';inherits:false;initial-value:#5ba8f0}
+:root{--blue:#1668c8;--sun:#f2a56b;--ink:#1a1f29;--white:#fff;--glass:rgba(255,255,255,.16);--glass-b:rgba(255,255,255,.28);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root:not([data-theme="light"]){color-scheme:light dark}
+*{box-sizing:border-box;margin:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{min-height:100vh;font-family:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--white);background:#1668c8;background:linear-gradient(180deg,var(--a),var(--b)) fixed;transition:--a 1.4s,--b 1.4s;overflow-x:hidden}
+canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+main{position:relative;z-index:1;max-width:620px;margin:0 auto;padding:18px 18px 40px}
+header{display:flex;align-items:center;gap:12px}
+header img{width:46px;height:46px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px var(--white)}
+.word{font-weight:900;font-size:24px;line-height:.95;letter-spacing:-.02em}
+.word b{color:var(--blue);background:#fff;border-radius:6px;padding:0 6px;margin-left:2px}
+.search{position:relative;margin-top:18px}
+.search input{width:100%;height:52px;border-radius:26px;border:2px solid transparent;padding:0 20px;font:600 16px 'Figtree',system-ui,sans-serif;color:var(--ink);background:#fff;outline:none}
+.search input:focus-visible{border-color:var(--sun);box-shadow:0 0 0 4px rgba(242,165,107,.45)}
+.sug{position:absolute;left:0;right:0;top:58px;background:#fff;color:var(--ink);border-radius:18px;overflow:hidden;z-index:5;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+.sug button{display:block;width:100%;text-align:left;border:0;background:none;padding:12px 20px;font:600 15px 'Figtree',system-ui,sans-serif;color:var(--ink);cursor:pointer}
+.sug button small{display:block;font-weight:400;color:#5c6676}
+.sug button:hover,.sug button:focus-visible{background:#e9f1fb;outline:none}
+.hero{margin-top:34px}
+.city{font-size:22px;font-weight:800}
+.sub{opacity:.85;font-weight:600}
+.temp{font-size:clamp(96px,28vw,150px);font-weight:900;letter-spacing:-.05em;line-height:1;margin:6px 0 0 -4px}
+.temp sup{font-size:.4em;vertical-align:top;position:relative;top:.18em;letter-spacing:0}
+.desc{font-size:24px;font-weight:800}
+.stats{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.stats div{background:var(--glass);border:1px solid var(--glass-b);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:16px;padding:10px 14px;min-width:96px}
+.stats small{display:block;opacity:.8;font-weight:600;font-size:13px}
+.stats strong{font-size:18px;font-weight:800}
+h2{font-size:17px;font-weight:800;margin:30px 0 12px}
+.days{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.day{background:var(--glass);border:1px solid var(--glass-b);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:22px;padding:16px 10px;text-align:center}
+.day .n{font-weight:800;text-transform:capitalize}
+.day .i{font-size:38px;margin:8px 0}
+.day .mx{font-size:24px;font-weight:900}
+.day .mn{opacity:.75;font-weight:600}
+.day .p{margin-top:8px;font-size:13px;font-weight:700;color:#fff;background:rgba(22,104,200,.75);border-radius:10px;padding:3px 0}
+.demo{margin-top:30px;font-size:13px;opacity:.9}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.chips button{border:1px solid var(--glass-b);background:var(--glass);color:#fff;border-radius:20px;padding:7px 12px;font:700 13px 'Figtree',system-ui,sans-serif;cursor:pointer}
+.chips button:focus-visible,.chips button:hover{background:var(--sun);color:var(--ink);outline:none}
+.note{margin-top:18px;font-size:12px;opacity:.75}
+[hidden]{display:none!important}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr))}
+.greet{font-size:15px;font-weight:700;opacity:.95}.phrase{font-weight:800;font-size:19px;margin-bottom:18px}
+.bar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.bar button{border:1px solid var(--glass-b);background:var(--glass);color:#fff;border-radius:20px;font:700 14px 'Figtree',system-ui,sans-serif;cursor:pointer;padding:7px 12px}
+.bar button.on{background:var(--sun);color:var(--ink)}.bar button:focus-visible{outline:3px solid var(--sun)}
+.hours{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x proximity}
+.hr{flex:0 0 66px;text-align:center;background:var(--glass);border:1px solid var(--glass-b);border-radius:18px;padding:10px 4px;scroll-snap-align:start;font-weight:700}
+.hr i{display:block;font-style:normal;font-size:24px;margin:4px 0}.hr small{display:block;font-size:12px;opacity:.9}
+.rng{height:5px;border-radius:3px;background:rgba(255,255,255,.25);margin:8px 6px;position:relative}
+.rng span{position:absolute;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,#8fd0ff,var(--sun))}
+.day .w{font-size:12px;opacity:.85;margin-top:6px;font-weight:600}
+.stats button{background:var(--glass);border:1px solid var(--glass-b);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:16px;padding:10px 14px;color:#fff;font:inherit;text-align:left;cursor:pointer}
+.stats button:hover{background:var(--glass-b)}.stats button:focus-visible,#sx:focus-visible{outline:3px solid var(--sun)}
+#ov{position:fixed;inset:0;z-index:20;background:rgba(10,20,40,.6);display:flex;align-items:flex-end;justify-content:center}
+.sheet{position:relative;width:100%;max-width:560px;max-height:84vh;overflow:auto;background:#1a1f29;color:#fff;border-radius:26px 26px 0 0;padding:24px 22px calc(28px + env(safe-area-inset-bottom,0px));animation:up .28s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+@media(min-width:700px){#ov{align-items:center}.sheet{border-radius:26px}}
+@media(prefers-reduced-motion:reduce){.sheet{animation:none}}
+#sx{position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:16px;cursor:pointer}
+.sheet h3{font-size:20px;font-weight:800;margin:0 40px 10px 0}.sheet p{line-height:1.5;opacity:.9;margin:8px 0}
+.bv{font-size:52px;font-weight:900;letter-spacing:-.03em}
+.mt{height:10px;border-radius:5px;position:relative;margin:18px 0 10px}
+.mt i{position:absolute;top:-5px;width:6px;height:20px;border-radius:3px;background:#fff;transform:translateX(-50%)}
+.bs{display:flex;gap:3px;align-items:flex-end;height:110px;margin-top:14px;border-bottom:1px solid rgba(255,255,255,.3)}
+.bs div{flex:1;background:linear-gradient(#8fd0ff,#1668c8);border-radius:3px 3px 0 0}
+.bl{display:flex;justify-content:space-between;font-size:12px;opacity:.8;margin-top:4px}
+.soon{margin-top:14px;padding:16px;border-radius:16px;background:rgba(22,104,200,.35);font-weight:700}
+.leaflet-pane,.leaflet-tile,.leaflet-layer,.leaflet-tile-container,.leaflet-pane>svg,.leaflet-pane>canvas{position:absolute;left:0;top:0}
+.leaflet-container{overflow:hidden;background:#0f1520;touch-action:none;-webkit-tap-highlight-color:transparent;outline:0}
+.leaflet-container img{max-width:none!important;max-height:none!important}
+.leaflet-tile{user-select:none;-webkit-user-drag:none;visibility:hidden}.leaflet-tile-loaded{visibility:inherit}
+.leaflet-pane{z-index:400}.leaflet-tile-pane{z-index:200}.leaflet-overlay-pane{z-index:400}.leaflet-map-pane svg{z-index:200}
+.leaflet-zoom-animated{transform-origin:0 0}.leaflet-zoom-anim .leaflet-zoom-animated{transition:transform .25s cubic-bezier(0,0,.25,1)}
+.leaflet-zoom-anim .leaflet-tile,.leaflet-pan-anim .leaflet-tile{transition:none}.leaflet-zoom-anim .leaflet-zoom-hide{visibility:hidden}
+.leaflet-grab{cursor:grab}.leaflet-dragging .leaflet-grab{cursor:grabbing}
+#wm .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9) saturate(.7)}
+#wm{height:340px;border-radius:16px;position:relative;overflow:hidden;margin-top:14px}
+#wh{width:100%;margin:14px 0 0;accent-color:#f2a56b}
+.lg{height:8px;border-radius:4px;margin-top:12px;background:linear-gradient(90deg,#a8dcff,#4d9cf5,#f2a56b,#ff7a45)}
+.at{display:block;opacity:.6;font-size:11px;margin-top:6px}
+</style>
+</head>
+<body>
+<canvas id="cv" aria-hidden="true"></canvas>
+<main>
+  <header>
+    <img src="data:image/jpeg;base64,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" alt="Logo Weather Bro">
+    <div class="word">Weather<br><b>Bro</b></div>
+  </header>
+  <div class="search">
+    <input id="q" type="search" placeholder="Buscá tu ciudad…" autocomplete="off" aria-label="Buscar ciudad">
+    <div class="sug" id="sug" hidden></div>
+  </div>
+  <section class="hero" aria-live="polite">
+    <div class="greet" id="gr"></div><div class="phrase" id="ph"></div>
+    <div class="city" id="city">Buenos Aires</div>
+    <div class="sub" id="reg">Ciudad de Buenos Aires</div>
+    <div class="bar"><button id="star">☆ Hacer principal</button><button id="loc">📍 Mi ubicación</button><button id="uT">°C</button><button id="uW">km/h</button></div>
+    <div class="temp"><span id="t">--</span><sup>°</sup></div>
+    <div class="desc" id="d">Cargando…</div>
+    <div class="stats">
+      <button data-d="fl"><small>Sensación</small><strong id="fl">--</strong></button>
+      <button data-d="w"><small>Viento</small><strong id="w">--</strong></button>
+      <button data-d="h"><small>Humedad</small><strong id="h">--</strong></button><button data-d="uv"><small>Índice UV</small><strong id="uv">--</strong></button><button data-d="pr"><small>Presión</small><strong id="pr">--</strong></button><button data-d="vi"><small>Visibilidad</small><strong id="vi">--</strong></button><button data-d="sr"><small>Amanecer</small><strong id="sr">--</strong></button><button data-d="ss"><small>Atardecer</small><strong id="ss">--</strong></button><button data-d="rn"><small>Lluvia hoy</small><strong id="rn">--</strong></button>
+    </div>
+  </section>
+  <h2>Próximas horas</h2><div class="hours" id="hrs"></div>
+  <h2>Próximos 3 días</h2>
+  <div class="days" id="days"></div>
+  <div class="demo" id="demo" hidden>
+    Estás viendo datos de ejemplo. Probá cómo cambia el fondo:
+    <div class="chips" id="chips"></div>
+  </div>
+  <p class="note" id="src">Datos: Open-Meteo (modelos GFS, ICON y ECMWF).</p>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<div id="ov" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t"><button id="sx" aria-label="Cerrar">✕</button><h3 id="sh-t"></h3><div id="sb"></div></div></div>
+<script>
+const $=s=>document.querySelector(s);
+const CITIES=[["Buenos Aires",-34.61,-58.38,"Ciudad de Buenos Aires"],["Córdoba",-31.42,-64.18,"Córdoba"],["Rosario",-32.95,-60.64,"Santa Fe"],["Mendoza",-32.89,-68.84,"Mendoza"],["San Miguel de Tucumán",-26.82,-65.22,"Tucumán"],["Salta",-24.78,-65.41,"Salta"],["Mar del Plata",-38.0,-57.55,"Buenos Aires"],["San Carlos de Bariloche",-41.13,-71.31,"Río Negro"],["Ushuaia",-54.8,-68.3,"Tierra del Fuego"],["Neuquén",-38.95,-68.06,"Neuquén"],["Posadas",-27.37,-55.9,"Misiones"],["Resistencia",-27.45,-58.99,"Chaco"]];
+const SKY={clear:['#1668c8','#5ba8f0'],partly:['#2a73cf','#7fb6e8'],cloud:['#5f7189','#9aa9bc'],fog:['#8d99a6','#c3cbd3'],rain:['#38485e','#62758d'],storm:['#1f2634','#46506a'],snow:['#8fa6bf','#d6e2ee']};
+const NIGHT={clear:['#0a1530','#1b3270'],partly:['#101b38','#2a3c6e'],cloud:['#1e2736','#364458'],fog:['#2a323d','#4a5562'],rain:['#161d2a','#2d3a4d'],storm:['#0d111a','#262e42'],snow:['#34445a','#6d819b']};
+const NAME={clear:'Despejado',partly:'Parcialmente nublado',cloud:'Nublado',fog:'Niebla',rain:'Lluvia',storm:'Tormenta',snow:'Nieve'};
+const ICON={clear:'☀️',partly:'⛅',cloud:'☁️',fog:'🌫️',rain:'🌧️',storm:'⛈️',snow:'❄️'};
+function kind(c){if(c===0)return'clear';if(c<=2)return'partly';if(c===3)return'cloud';if(c<=48)return'fog';if(c<=67||(c>=80&&c<=82))return'rain';if(c<=77||c===85||c===86)return'snow';return'storm'}
+const CODE={clear:0,partly:2,cloud:3,fog:45,rain:61,storm:95,snow:73};
+let cur={k:'clear',day:true};
+
+/* ---------- Fondo animado ---------- */
+const cv=$('#cv'),cx=cv.getContext('2d');let W,H,P=[],clouds=[],stars=[],flash=0,nextBolt=0,bolt=null;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function size(){const r=devicePixelRatio||1;W=innerWidth;H=innerHeight;cv.width=W*r;cv.height=H*r;cx.setTransform(r,0,0,r,0,0)}
+addEventListener('resize',()=>{size();build()});
+function build(){const {k,day}=cur;P=[];clouds=[];
+ const nc={partly:3,cloud:7,rain:7,storm:8,snow:6}[k]||0;
+ for(let i=0;i<nc;i++)clouds.push({x:Math.random()*W,y:40+Math.random()*H*.35,s:.7+Math.random()*.9,v:.1+Math.random()*.25});
+ if(k==='fog')for(let i=0;i<5;i++)clouds.push({x:Math.random()*W,y:H*.2+i*H*.14,s:3,v:.15+Math.random()*.2,fog:1});
+ const n=k==='rain'?140:k==='storm'?220:k==='snow'?110:0;
+ for(let i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,v:k==='snow'?.6+Math.random()*1.2:9+Math.random()*8,r:k==='snow'?1.5+Math.random()*2.5:0,ph:Math.random()*6});
+ stars=[];if(!day&&(k==='clear'||k==='partly'))for(let i=0;i<70;i++)stars.push({x:Math.random()*W,y:Math.random()*H*.6,r:Math.random()*1.4+.3,ph:Math.random()*6});
+}
+function cloud(c,dark){const a=dark?.5:.35;for(const [dx,dy,r] of [[0,0,46],[44,-14,56],[96,2,42],[52,10,50]]){const x=c.x+dx*c.s,y=c.y+dy*c.s,R=r*c.s;const g=cx.createRadialGradient(x,y,0,x,y,R);const col=dark?'30,40,58':'255,255,255';g.addColorStop(0,`rgba(${col},${a})`);g.addColorStop(1,`rgba(${col},0)`);cx.fillStyle=g;cx.beginPath();cx.arc(x,y,R,0,7);cx.fill()}}
+function frame(t){cx.clearRect(0,0,W,H);const {k,day}=cur;
+ if(day&&(k==='clear'||k==='partly')){const x=W*.78,y=H*.16,p=1+Math.sin(t/900)*.04;
+  const g=cx.createRadialGradient(x,y,0,x,y,170*p);g.addColorStop(0,'rgba(255,230,170,.95)');g.addColorStop(.25,'rgba(242,165,107,.5)');g.addColorStop(1,'rgba(242,165,107,0)');cx.fillStyle=g;cx.beginPath();cx.arc(x,y,170*p,0,7);cx.fill();
+  cx.save();cx.translate(x,y);cx.rotate(t/9000);cx.strokeStyle='rgba(255,236,190,.22)';cx.lineWidth=6;cx.lineCap='round';for(let i=0;i<12;i++){cx.rotate(Math.PI/6);cx.beginPath();cx.moveTo(70,0);cx.lineTo(110+(i%2)*30,0);cx.stroke()}cx.restore();
+  cx.fillStyle='#ffe3b0';cx.beginPath();cx.arc(x,y,40,0,7);cx.fill()}
+ if(!day&&(k==='clear'||k==='partly')){for(const s of stars){cx.globalAlpha=.4+.6*Math.abs(Math.sin(t/900+s.ph));cx.fillStyle='#fff';cx.beginPath();cx.arc(s.x,s.y,s.r,0,7);cx.fill()}cx.globalAlpha=1;
+  const x=W*.8,y=H*.15;cx.fillStyle='#f4efe2';cx.beginPath();cx.arc(x,y,32,0,7);cx.fill();cx.fillStyle='rgba(16,27,56,.9)';cx.beginPath();cx.arc(x+14,y-6,28,0,7);cx.fill()}
+ const dark=k==='rain'||k==='storm';
+ for(const c of clouds){c.x+=c.v;if(c.x>W+250)c.x=-300;
+  if(c.fog){const g=cx.createLinearGradient(c.x-300,0,c.x+300,0);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(255,255,255,.22)');g.addColorStop(1,'rgba(255,255,255,0)');cx.fillStyle=g;cx.fillRect(c.x-300,c.y,600,90)}else cloud(c,dark)}
+ if(k==='rain'||k==='storm'){cx.strokeStyle='rgba(200,220,255,.5)';cx.lineWidth=1.3;cx.beginPath();for(const p of P){cx.moveTo(p.x,p.y);cx.lineTo(p.x-2.5,p.y+14);p.y+=p.v;p.x-=.8;if(p.y>H){p.y=-20;p.x=Math.random()*W}}cx.stroke()}
+ if(k==='snow'){cx.fillStyle='rgba(255,255,255,.9)';for(const p of P){p.y+=p.v;p.x+=Math.sin(t/700+p.ph)*.5;if(p.y>H){p.y=-5;p.x=Math.random()*W}cx.beginPath();cx.arc(p.x,p.y,p.r,0,7);cx.fill()}}
+ if(k==='storm'){if(t>nextBolt){flash=1;nextBolt=t+2500+Math.random()*4500;let x=Math.random()*W,y=0;bolt=[[x,y]];while(y<H*.55){x+=(Math.random()-.5)*60;y+=30+Math.random()*30;bolt.push([x,y])}}
+  if(flash>0){cx.fillStyle=`rgba(255,255,255,${flash*.35})`;cx.fillRect(0,0,W,H);if(bolt){cx.strokeStyle=`rgba(255,250,210,${flash})`;cx.lineWidth=3;cx.beginPath();bolt.forEach((p,i)=>i?cx.lineTo(...p):cx.moveTo(...p));cx.stroke()}flash-=.04}}
+ if(!reduce)requestAnimationFrame(frame)}
+let started=false;
+function setSky(k,day){cur={k,day};const [a,b]=(day?SKY:NIGHT)[k];document.body.style.setProperty('--a',a);document.body.style.setProperty('--b',b);build();if(reduce){frame(0)}else if(!started){started=true;requestAnimationFrame(frame)}}
+
+/* ---------- Datos ---------- */
+const norm=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+async function getJSON(u){const ac=new AbortController(),to=setTimeout(()=>ac.abort(),5000);try{const r=await fetch(u,{signal:ac.signal});if(!r.ok)throw 0;return await r.json()}finally{clearTimeout(to)}}
+let U={t:'C',w:'kmh'};try{U=JSON.parse(localStorage.getItem('wb_u'))||U}catch(e){}
+let MAIN=null;try{MAIN=JSON.parse(localStorage.getItem('wb_main'))}catch(e){}
+let lastC,lastD;
+const T=c=>Math.round(U.t==='F'?c*1.8+32:c)+'°';
+const WD=k=>U.w==='kn'?Math.round(k/1.852)+' kn':U.w==='ms'?Math.round(k/3.6)+' m/s':Math.round(k)+' km/h';
+const UVL=u=>u<3?'Bajo':u<6?'Moderado':u<8?'Alto':u<11?'Muy alto':'Extremo';
+const note=m=>$('#src').textContent=m;
+function demoData(lat,k){const base=Math.round(27-(Math.abs(lat)-25)*.6),seq=['partly','rain','clear','cloud'],h0=new Date().getHours();
+ return{demo:true,temp:base,feel:base-1,wind:k==='storm'?45:14,hum:62,code:CODE[k||'clear'],day:true,uv:6,pres:1014,vis:10000,sr:'06:52',ss:'19:41',rain:k==='rain'?8:0,
+  hours:Array.from({length:24},(_,i)=>({h:(h0+i+1)%24,code:CODE[k||'clear'],t:base+4*Math.sin((h0+i-9)/24*6.28),pop:k==='rain'?70:10})),
+  days:[1,2,3].map(i=>{const kk=seq[(i+Math.round(Math.abs(lat)))%4];return{date:new Date(Date.now()+i*864e5),code:CODE[kk],max:base+3-i,min:base-7+i,pop:kk==='rain'?70:kk==='cloud'?25:5,wind:20+i*3}})}}
+async function load(c,fk){let d;
+ try{const j=await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day,pressure_msl&hourly=temperature_2m,precipitation_probability,weather_code,visibility&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max,precipitation_sum,wind_speed_10m_max&timezone=auto&forecast_days=4`);
+  const H=j.hourly,D=j.daily,C=j.current,i=Math.max(0,H.time.findIndex(t=>t>C.time)-1);
+  d={demo:false,temp:C.temperature_2m,feel:C.apparent_temperature,wind:C.wind_speed_10m,hum:C.relative_humidity_2m,code:C.weather_code,day:!!C.is_day,uv:D.uv_index_max[0],pres:C.pressure_msl,vis:H.visibility[i],sr:D.sunrise[0].slice(11,16),ss:D.sunset[0].slice(11,16),rain:D.precipitation_sum[0],
+   hours:H.time.slice(i+1,i+25).map((t,n)=>({h:+t.slice(11,13),code:H.weather_code[i+1+n],t:H.temperature_2m[i+1+n],pop:H.precipitation_probability[i+1+n]||0})),
+   days:[1,2,3].map(n=>({date:new Date(D.time[n]+'T12:00'),code:D.weather_code[n],max:D.temperature_2m_max[n],min:D.temperature_2m_min[n],pop:D.precipitation_probability_max[n]||0,wind:D.wind_speed_10m_max[n]}))}}
+ catch(e){d=demoData(c.lat,fk)}
+ render(c,d)}
+function phrase(k,d){const n=!d.day,t=d.temp;
+ if(k==='storm')return'Hoy mejor quedate adentro';
+ if(k==='snow')return n?'Noche de nieve, abrigate bien':'¡Se viene el muñeco de nieve!';
+ if(k==='rain')return n?'Noche mojada, paraguas obligatorio':'Hoy toca paraguas y campera';
+ if(k==='fog')return'Ojo en la ruta, casi no se ve';
+ if(d.wind>=40)return'Hoy sopla, ojo con el viento';
+ if(t>(n?25:30))return n?'Noche calurosa, salí liviano':'Hoy se derrite el asfalto, hidratate';
+ if(t<(n?10:8))return n?'Hoy se sale abrigado':'Abrigate bien, que pela';
+ if(k==='clear')return n?(t>=15?'Noche ideal para salir':'Noche de estrellas'):'Día de lentes y mate 😎';
+ if(k==='partly')return n?(t>=15?'Noche ideal para salir':'Estrellas entre nubes'):'Lentes en el bolsillo, por las dudas';
+ if(k==='cloud')return n?'Noche cerrada, sin estrellas':'Ni sol ni lluvia, tranqui';
+ return''}
+function render(c,d){lastC=c;lastD=d;const k=kind(d.code),hr=new Date().getHours();
+ $('#gr').textContent=hr>=5&&hr<12?'¡Buen día, bro!':hr>=12&&hr<20?'¿Qué hacés, bro?':'Buenas noches, bro';
+ $('#ph').textContent=phrase(k,d);
+ $('#city').textContent=c.name;$('#reg').textContent=c.region||'Argentina';
+ $('#t').textContent=T(d.temp).slice(0,-1);$('#d').textContent=NAME[k];
+ $('#fl').textContent=T(d.feel);$('#w').textContent=WD(d.wind);$('#h').textContent=d.hum+'%';
+ $('#uv').textContent=Math.round(d.uv)+' · '+UVL(d.uv);$('#pr').textContent=Math.round(d.pres)+' hPa';$('#vi').textContent=Math.round(d.vis/100)/10+' km';$('#sr').textContent=d.sr;$('#ss').textContent=d.ss;$('#rn').textContent=Math.round(d.rain*10)/10+' mm';
+ $('#hrs').innerHTML=d.hours.map(x=>`<div class="hr">${String(x.h).padStart(2,'0')}h<i>${ICON[kind(x.code)]}</i>${T(x.t)}<small>💧${x.pop}%</small></div>`).join('');
+ const lo=Math.min(...d.days.map(x=>x.min)),hi=Math.max(...d.days.map(x=>x.max)),sp=hi-lo||1;
+ $('#days').innerHTML=d.days.map(x=>{const kk=kind(x.code);return`<div class="day"><div class="n">${x.date.toLocaleDateString('es-AR',{weekday:'long'})}</div><div class="i" title="${NAME[kk]}">${ICON[kk]}</div><div class="mx">${T(x.max)}</div><div class="mn">${T(x.min)}</div><div class="rng"><span style="left:${(x.min-lo)/sp*100}%;width:${Math.max(10,(x.max-x.min)/sp*100)}%"></span></div><div class="w">💨 ${WD(x.wind)}</div><div class="p">💧 ${x.pop}%</div></div>`}).join('');
+ const m=MAIN&&MAIN.name===c.name&&Math.abs(MAIN.lat-c.lat)<.01;$('#star').textContent=m?'⭐ Principal':'☆ Hacer principal';$('#star').classList.toggle('on',!!m);
+ $('#uT').textContent='°'+U.t;$('#uW').textContent={kmh:'km/h',kn:'nudos',ms:'m/s'}[U.w];
+ $('#demo').hidden=!d.demo;
+ note(d.demo?'Datos de ejemplo: la conexión con Open-Meteo no está disponible desde esta vista previa.':'Datos: Open-Meteo (modelos GFS, ICON y ECMWF).');
+ setSky(k,d.day)}
+$('#star').onclick=()=>{MAIN={name:lastC.name,region:lastC.region,lat:lastC.lat,lon:lastC.lon};try{localStorage.setItem('wb_main',JSON.stringify(MAIN))}catch(e){}render(lastC,lastD)};
+const sv=()=>{try{localStorage.setItem('wb_u',JSON.stringify(U))}catch(e){}render(lastC,lastD)};
+$('#uT').onclick=()=>{U.t=U.t==='C'?'F':'C';sv()};
+$('#uW').onclick=()=>{U.w={kmh:'kn',kn:'ms',ms:'kmh'}[U.w];sv()};
+$('#loc').onclick=()=>{if(!navigator.geolocation)return note('Tu navegador no permite usar la ubicación.');note('Buscando tu ubicación…');
+ navigator.geolocation.getCurrentPosition(async p=>{const c={name:'Mi ubicación',region:'',lat:p.coords.latitude,lon:p.coords.longitude};
+  try{const j=await getJSON(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${c.lat}&longitude=${c.lon}&localityLanguage=es`);c.name=j.city||j.locality||c.name;c.region=j.principalSubdivision||''}catch(e){}
+  city=c;load(c)},()=>note('No pudimos acceder a tu ubicación. Revisá el permiso del navegador.'),{timeout:8000})};
+$('#chips').innerHTML=Object.keys(NAME).map(k=>`<button data-k="${k}">${ICON[k]} ${NAME[k]}</button>`).join('')+'<button data-k="night">🌙 Noche</button>';
+let city=MAIN||{name:'Buenos Aires',region:'Ciudad de Buenos Aires',lat:-34.61,lon:-58.38};
+let NI=false;
+$('#chips').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;
+ if(k==='night'){NI=!NI;render(city,{...demoData(city.lat,kind(lastD.code)),day:!NI});return}
+ render(city,{...demoData(city.lat,k),day:!NI})};
+
+/* ---------- Buscador ---------- */
+let tm;const q=$('#q'),sug=$('#sug');
+q.addEventListener('input',()=>{clearTimeout(tm);const v=q.value.trim();if(v.length<2){sug.hidden=true;return}tm=setTimeout(()=>search(v),250)});
+async function search(v){let r;
+ try{const j=await getJSON(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(v)}&count=6&language=es&countryCode=AR`);r=(j.results||[]).map(x=>({name:x.name,region:x.admin1,lat:x.latitude,lon:x.longitude}))}
+ catch(e){r=CITIES.filter(c=>norm(c[0]).includes(norm(v))).map(c=>({name:c[0],region:c[3],lat:c[1],lon:c[2]}))}
+ sug.innerHTML=r.length?'':'<button disabled>No encontramos esa ciudad. Probá con otro nombre.</button>';
+ r.forEach(c=>{const b=document.createElement('button');b.innerHTML=`${c.name}<small>${c.region||'Argentina'}</small>`;b.onclick=()=>{city=c;q.value='';sug.hidden=true;load(c)};sug.appendChild(b)});
+ sug.hidden=false}
+document.addEventListener('click',e=>{if(!e.target.closest('.search'))sug.hidden=true});
+q.addEventListener('keydown',e=>{if(e.key==='Escape')sug.hidden=true});
+
+
+const ov=$('#ov'),hh=n=>String(n).padStart(2,'0'),mn=h=>{const [a,b]=h.split(':');return +a*60+ +b};
+const mt=(v,a,b,g)=>`<div class="mt" style="background:linear-gradient(90deg,${g})"><i style="left:${Math.min(100,Math.max(0,(v-a)/(b-a)*100))}%"></i></div>`;
+function detail(k){const d=lastD,big=(v,l)=>`<div class="bv">${v}</div><p><b>${l}</b></p>`;
+ if(k==='fl'){const x=d.feel-d.temp,a=Math.abs(Math.round(x*(U.t==='F'?1.8:1)));return['Sensación térmica',big(T(d.feel),Math.abs(x)<1.5?'Igual que la temperatura real':x<0?`${a}° más fría que el termómetro`:`${a}° más cálida que el termómetro`)+`<p>La temperatura real es ${T(d.temp)}. La sensación cambia sobre todo con el viento, que enfría, y con la humedad (${d.hum}%), que hace sentir más el calor.</p>`]}
+ if(k==='w')return['Viento',big(WD(d.wind),d.wind<12?'Brisa suave':d.wind<29?'Viento moderado':d.wind<50?'Viento fuerte':'Temporal')+`<p>Máximos previstos: ${d.days.map(x=>x.date.toLocaleDateString('es-AR',{weekday:'short'})+' '+WD(x.wind)).join(' · ')}.</p><div id="wm"></div><div class="lg"></div><div class="bl"><span>suave</span><span>fuerte</span></div><input id="wh" type="range" min="0" max="24" value="0" aria-label="Hora del pronóstico"><p id="wl"><b>Ahora</b></p><p id="wr">Cargando viento…</p><small class="at">© OpenStreetMap contributors · Viento: Open-Meteo</small>`];
+ if(k==='h')return['Humedad',big(d.hum+'%',d.hum<30?'Aire seco':d.hum<60?'Confortable':d.hum<80?'Algo húmedo':'Muy húmedo')+mt(d.hum,0,100,'#f2a56b,#8fd0ff,#1668c8')+'<p>Con humedad alta el calor se siente más y cuesta más refrescarse. Con humedad baja se resecan la piel y la garganta.</p>'];
+ if(k==='uv'){const u=Math.round(d.uv);return['Índice UV',big(u+' · '+UVL(d.uv),u<3?'Podés estar al aire libre sin problema':u<6?'Usá protector si vas a estar mucho al sol':u<8?'Protector, lentes y gorra':u<11?'Buscá sombra entre las 11 y las 16':'Evitá exponerte al sol')+mt(d.uv,0,11,'#4cc38a,#f2d04b,#f2a56b,#e5534b,#a56cd6')+'<p>Es el valor máximo previsto para hoy. Es más alto al mediodía y baja hacia la tarde.</p>']}
+ if(k==='pr')return['Presión',big(Math.round(d.pres)+' hPa',d.pres<1005?'Baja: suele venir con nubes e inestabilidad':d.pres<1020?'Normal':'Alta: suele traer tiempo estable')+mt(d.pres,985,1040,'#8fd0ff,#1668c8,#f2a56b')+'<p>Se mide ajustada al nivel del mar, así se puede comparar entre ciudades. Lo que más importa es si sube o baja con las horas.</p>'];
+ if(k==='vi'){const v=d.vis/1000;return['Visibilidad',big(Math.round(v*10)/10+' km',v>=10?'Excelente':v>=4?'Buena':v>=1?'Reducida: manejá con cuidado':'Muy baja: extremá precauciones')+mt(v,0,10,'#e5534b,#f2d04b,#4cc38a')+'<p>Distancia hasta donde se distinguen los objetos. Baja con niebla, lluvia fuerte o humo.</p>']}
+ if(k==='rn'){const x=d.hours.reduce((a,b)=>b.pop>a.pop?b:a);return['Lluvia',big(Math.round(d.rain*10)/10+' mm','Acumulado hoy')+`<p>Probabilidad por hora, próximas 24 h. Pico: ${x.pop}% a las ${hh(x.h)}h.</p><div class="bs">${d.hours.map(y=>`<div title="${y.pop}%" style="height:${Math.max(2,y.pop)}%"></div>`).join('')}</div><div class="bl"><span>${hh(d.hours[0].h)}h</span><span>${hh(d.hours[12].h)}h</span><span>${hh(d.hours[23].h)}h</span></div>`]}
+ const a=mn(d.sr),b=mn(d.ss),n=new Date(),m=n.getHours()*60+n.getMinutes(),p=Math.min(1,Math.max(0,(m-a)/(b-a))),up=m>=a&&m<=b,fm=t=>Math.floor(t/60)+' h '+t%60+' min';
+ return['Amanecer y atardecer',`<svg viewBox="0 0 300 130" width="100%" role="img" aria-label="Recorrido del sol"><path d="M20 100A130 130 0 0 1 280 100" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="3" stroke-dasharray="6 6"/><line x1="10" y1="100" x2="290" y2="100" stroke="rgba(255,255,255,.4)"/><circle cx="${150-130*Math.cos(Math.PI*p)}" cy="${100-130*Math.sin(Math.PI*p)}" r="11" fill="#f2a56b" opacity="${up?1:.35}"/><text x="20" y="122" fill="#fff" font-size="13">${d.sr}</text><text x="280" y="122" fill="#fff" font-size="13" text-anchor="end">${d.ss}</text></svg><p><b>${fm(b-a)} de luz hoy.</b> ${up?'Faltan '+fm(b-m)+' para el atardecer.':m<a?'El sol sale a las '+d.sr+'.':'El sol ya se puso. Mañana sale cerca de las '+d.sr+'.'}</p>`]}
+let WM=null;
+const DIR=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'];
+const WCOL=s=>s<12?'#a8dcff':s<28?'#4d9cf5':s<45?'#f2a56b':'#ff7a45';
+function initWind(){
+ const box=$('#wm'),sl=$('#wh'),ro=$('#wr'),N=7;
+ if(typeof L==='undefined'){box.textContent='El mapa necesita conexión a internet.';return}
+ const c=lastC,map=L.map(box,{zoomControl:false,attributionControl:false,minZoom:4,maxZoom:9}).setView([c.lat,c.lon],6);
+ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:9}).addTo(map);
+ L.circleMarker([c.lat,c.lon],{radius:6,color:'#fff',weight:2,fillColor:'#f2a56b',fillOpacity:1}).addTo(map);
+ let G=null,hr=0,dem=false,P=[],raf,tm;
+ const cv=document.createElement('canvas'),cx2=cv.getContext('2d');cv.style.cssText='position:absolute;inset:0;pointer-events:none;z-index:450';box.appendChild(cv);
+ async function grid(){const b=map.getBounds().pad(.25),s=b.getSouth(),n=b.getNorth(),w=b.getWest(),e=b.getEast(),la=[],lo=[];
+  for(let i=0;i<N;i++)for(let j=0;j<N;j++){la.push((s+(n-s)*i/(N-1)).toFixed(2));lo.push((w+(e-w)*j/(N-1)).toFixed(2))}
+  let data;
+  try{const j=await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${la}&longitude=${lo}&hourly=wind_speed_10m,wind_direction_10m&forecast_hours=25&timezone=auto`);
+   data=j.map(p=>p.hourly.wind_speed_10m.map((v,h)=>{const r=p.hourly.wind_direction_10m[h]*Math.PI/180;return[-v*Math.sin(r),-v*Math.cos(r)]}));dem=false}
+  catch(x){dem=true;data=la.map((_,k)=>{const i=Math.floor(k/N),j=k%N;return Array.from({length:25},(_,h)=>{const v=Math.max(8,lastD.wind)*(.5+.9*Math.abs(Math.sin(i*.7+h*.1))),r=Math.sin(j*.6+i*.4)*1.2+h*.03+1;return[-v*Math.sin(r),-v*Math.cos(r)]})})}
+  G={s,n,w,e,data};ro.textContent=(dem?'Datos de ejemplo. ':'')+'Tocá el mapa para ver el viento en un punto.'}
+ function wind(lat,lng){if(!G)return null;const fy=(lat-G.s)/(G.n-G.s)*(N-1),fx=(lng-G.w)/(G.e-G.w)*(N-1);if(fx<0||fy<0||fx>N-1||fy>N-1)return null;
+  const i=Math.min(N-2,fy|0),j=Math.min(N-2,fx|0),ty=fy-i,tx=fx-j,g=(a,b)=>G.data[a*N+b][hr],m=k=>(1-ty)*((1-tx)*g(i,j)[k]+tx*g(i,j+1)[k])+ty*((1-tx)*g(i+1,j)[k]+tx*g(i+1,j+1)[k]);return[m(0),m(1)]}
+ function reset(){const r=devicePixelRatio||1,W=box.clientWidth,H=box.clientHeight;cv.width=W*r;cv.height=H*r;cx2.setTransform(r,0,0,r,0,0);P=Array.from({length:550},()=>({x:Math.random()*W,y:Math.random()*H,a:Math.random()*60}))}
+ function step(){const W=box.clientWidth,H=box.clientHeight;cx2.globalCompositeOperation='destination-out';cx2.fillStyle='rgba(0,0,0,.07)';cx2.fillRect(0,0,W,H);cx2.globalCompositeOperation='source-over';cx2.lineWidth=1.6;
+  for(const p of P){const ll=map.containerPointToLatLng([p.x,p.y]),v=wind(ll.lat,ll.lng);if(!v||p.a++>80){p.x=Math.random()*W;p.y=Math.random()*H;p.a=0;continue}
+   const nx=p.x+v[0]*.07,ny=p.y-v[1]*.07;cx2.strokeStyle=WCOL(Math.hypot(v[0],v[1]));cx2.beginPath();cx2.moveTo(p.x,p.y);cx2.lineTo(nx,ny);cx2.stroke();p.x=nx;p.y=ny}
+  raf=requestAnimationFrame(step)}
+ const need=()=>{const b=map.getBounds();return!G||b.getSouth()<G.s||b.getNorth()>G.n||b.getWest()<G.w||b.getEast()>G.e};
+ map.on('moveend',()=>{reset();clearTimeout(tm);if(need())tm=setTimeout(grid,500)});
+ map.on('click',e=>{const v=wind(e.latlng.lat,e.latlng.lng);if(!v)return;const sp=Math.hypot(v[0],v[1]),dg=(Math.atan2(-v[0],-v[1])*180/Math.PI+360)%360;ro.textContent=`${WD(sp)} desde el ${DIR[Math.round(dg/22.5)%16]}`+(dem?' (ejemplo)':'')});
+ sl.oninput=()=>{hr=+sl.value;$('#wl').innerHTML='<b>'+(hr?'En '+hr+' h ('+hh((new Date().getHours()+hr)%24)+':00)':'Ahora')+'</b>'};
+ WM={stop(){cancelAnimationFrame(raf);clearTimeout(tm);map.remove()}};
+ grid().then(()=>{if(!WM)return;reset();step()})}
+let lf;
+function closeSheet(){WM&&WM.stop();WM=null;ov.hidden=true;lf&&lf.focus()}
+document.querySelector('.stats').onclick=e=>{const b=e.target.closest('button[data-d]');if(!b)return;const [t,h]=detail(b.dataset.d==='ss'?'sr':b.dataset.d);$('#sh-t').textContent=t;$('#sb').innerHTML=h;lf=b;ov.hidden=false;$('#sx').focus();if(b.dataset.d==='w')initWind()};
+$('#sx').onclick=closeSheet;ov.onclick=e=>{if(e.target===ov)closeSheet()};
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!ov.hidden)closeSheet()});
+size();setSky('clear',true);load(city);
+</script>
+</body>
+</html>
