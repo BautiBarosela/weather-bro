@@ -172,6 +172,21 @@ main{max-width:1400px;margin:0 0 0 200px;padding:28px 56px 56px}
 .l0{background:#4cc38a;border-color:#4cc38a}.l1{background:linear-gradient(90deg,#f2d04b 50%,transparent 50%);border-color:#f2d04b}.l2{background:transparent;border-color:#ff8a4d}
 .lgd{font-size:13px;margin:-2px 0 10px}.lgd small{display:block;opacity:.65;margin-top:3px}.lgd .cf{margin:0 5px 0 12px}.lgd .cf:first-of-type{margin-left:6px}
 @media(min-width:900px){#lgd{display:none}}
+button.cb{background:none;border:0;color:inherit;font:inherit;font-weight:500;font-size:20px;padding:0;cursor:pointer;text-align:left}.cb::after{content:'▾';margin-left:8px;opacity:.6;font-size:.8em}
+.cb:focus-visible,.cm:focus-visible,.ic:focus-visible,.cs:focus-visible{outline:2px solid var(--sun);outline-offset:2px}
+.cs{width:100%;height:44px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;padding:0 14px;font:400 15px 'Inter',system-ui,sans-serif;margin:8px 0}.cs::placeholder{color:rgba(255,255,255,.6)}
+.cr{display:flex;align-items:center;gap:6px;border-bottom:1px solid rgba(255,255,255,.14)}
+.cm{flex:1;text-align:left;background:none;border:0;color:#fff;padding:12px 0;font:500 15px 'Inter',system-ui,sans-serif;cursor:pointer}.cm small{display:block;font-weight:400;opacity:.65;font-size:12px}
+#cr .cm{width:100%;border-bottom:1px solid rgba(255,255,255,.14)}
+.ic{background:none;border:0;color:#fff;width:38px;height:38px;font-size:17px;cursor:pointer;border-radius:8px}.ic:hover{background:rgba(255,255,255,.1)}
+.ct2{display:flex;align-items:center;gap:6px;font-weight:500}.ct2 svg{width:20px;height:20px}
+.hl{border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:18px;margin:6px 0 18px;background:rgba(255,255,255,.07)}.hl small{opacity:.7}.hn{font-size:24px;font-weight:600;margin-top:2px}.hw{color:var(--sun);font-weight:600;margin-top:2px}.hl p{margin:8px 0 0}
+.acts{display:grid;gap:0}.ac{display:block;width:100%;text-align:left;color:inherit;font:inherit;background:none;border:0;border-bottom:1px solid rgba(255,255,255,.16);padding:14px 0}
+button.ac{cursor:pointer}button.ac:hover{background:rgba(255,255,255,.05)}.ac:focus-visible{outline:2px solid var(--sun)}
+.at2{display:flex;justify-content:space-between;gap:10px;font-weight:600}.at2 span{font-weight:500;font-size:14px;white-space:nowrap}.at2 .cf{margin:0 6px 0 0}
+.aw{font-size:14px;opacity:.85;margin-top:4px}.ac p{margin:4px 0 0;opacity:.75;font-size:14px}
+.l3{background:linear-gradient(90deg,#4cc38a 50%,transparent 50%);border-color:#4cc38a}
+@media(min-width:900px){.acts{grid-template-columns:1fr 1fr;column-gap:48px}}
 </style>
 </head>
 <body>
@@ -187,7 +202,7 @@ main{max-width:1400px;margin:0 0 0 200px;padding:28px 56px 56px}
   </div>
   <section class="hero" aria-live="polite">
     <div class="greet" id="gr"></div><div class="phrase" id="ph"></div>
-    <div class="city" id="city">Buenos Aires</div>
+    <button class="city cb" id="city" aria-label="Mis ciudades">Buenos Aires</button>
     <div class="sub" id="reg">Ciudad de Buenos Aires</div>
     <div class="bar"><button id="loc">Mi ubicación</button></div>
     <div class="temp"><span id="t">--</span><sup>°</sup></div>
@@ -201,7 +216,7 @@ main{max-width:1400px;margin:0 0 0 200px;padding:28px 56px 56px}
 <section class="vw" id="v-pro" hidden><h2>Próximos 7 días</h2><div class="lgd" id="lgd" hidden><div>Confianza del pronóstico: <i class="cf l0"></i>Alta <i class="cf l1"></i>Media <i class="cf l2"></i>Baja</div><small>Tocá un día para ver qué dice cada modelo</small></div>
   <div class="days" id="days"></div></section>
 <section class="vw" id="v-map" hidden></section>
-<section class="vw" id="v-act" hidden><h2>Actividades</h2><p class="soon">Próximamente: ¿qué hago hoy? Puntajes según el clima para salir a correr, andar en bici, ir a la pileta o hacer un asado.</p></section>
+<section class="vw" id="v-act" hidden><h2>Actividades</h2><div id="actb"></div></section>
 <section class="vw" id="v-mas" hidden><h2>Ciudad principal</h2><div class="bar"><button id="star">☆ Hacer principal</button></div><h2>Unidades</h2><div class="bar"><button id="uT">°C</button><button id="uW">km/h</button></div></section>
   <div class="demo" id="demo" hidden>
     Estás viendo datos de ejemplo. Probá cómo cambia el fondo:
@@ -276,13 +291,13 @@ const UVL=u=>u<3?'Bajo':u<6?'Moderado':u<8?'Alto':u<11?'Muy alto':'Extremo';
 const note=m=>$('#src').textContent=m;
 function demoData(lat,k){const base=Math.round(27-(Math.abs(lat)-25)*.6),seq=['partly','rain','clear','cloud'],h0=new Date().getHours();
  return{demo:true,temp:base,feel:base-1,wind:k==='storm'?45:14,hum:62,code:CODE[k||'clear'],day:true,uv:6,pres:1014,vis:10000,sr:'06:52',ss:'19:41',rain:k==='rain'?8:0,
-  hours:Array.from({length:24},(_,i)=>({h:(h0+i+1)%24,code:CODE[k||'clear'],t:base+4*Math.sin((h0+i-9)/24*6.28),pop:k==='rain'?70:10})),
+  hours:Array.from({length:24},(_,i)=>({h:(h0+i+1)%24,code:CODE[k||'clear'],t:base+4*Math.sin((h0+i-9)/24*6.28),pop:k==='rain'?70:10,w:10+(i%7)*3,uv:Math.max(0,Math.round(8*Math.sin((((h0+i+1)%24)-6)/12*Math.PI))),f:base+4*Math.sin((h0+i-9)/24*6.28)-1,mm:k==='rain'?1:0})),
   days:[0,1,2,3,4,5,6].map(i=>{const kk=seq[(i+Math.round(Math.abs(lat)))%4];return{date:new Date(Date.now()+i*864e5),code:CODE[kk],max:base+3-i%4,min:base-7+i%4,pop:kk==='rain'?70:kk==='cloud'?25:5,wind:20+i*3,gust:35+i*3,mm:kk==='rain'?6:0,uv:7-i%3}})}}
-async function load(c,fk){let d;
- try{const j=await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day,pressure_msl&hourly=temperature_2m,precipitation_probability,weather_code,visibility&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max&timezone=auto&forecast_days=7`);
+async function load(c,fk){let d;try{localStorage.setItem('wb_lastc',JSON.stringify(c))}catch(e){}
+ try{const j=await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day,pressure_msl&hourly=temperature_2m,precipitation_probability,weather_code,visibility,wind_speed_10m,uv_index,apparent_temperature,precipitation&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max&timezone=auto&forecast_days=7`);
   const H=j.hourly,D=j.daily,C=j.current,i=Math.max(0,H.time.findIndex(t=>t>C.time)-1);
   d={demo:false,temp:C.temperature_2m,feel:C.apparent_temperature,wind:C.wind_speed_10m,hum:C.relative_humidity_2m,code:C.weather_code,day:!!C.is_day,uv:D.uv_index_max[0],pres:C.pressure_msl,vis:H.visibility[i],sr:D.sunrise[0].slice(11,16),ss:D.sunset[0].slice(11,16),rain:D.precipitation_sum[0],
-   hours:H.time.slice(i+1,i+25).map((t,n)=>({h:+t.slice(11,13),code:H.weather_code[i+1+n],t:H.temperature_2m[i+1+n],pop:H.precipitation_probability[i+1+n]||0})),
+   hours:H.time.slice(i+1,i+25).map((t,n)=>({h:+t.slice(11,13),code:H.weather_code[i+1+n],t:H.temperature_2m[i+1+n],pop:H.precipitation_probability[i+1+n]||0,w:H.wind_speed_10m[i+1+n],uv:H.uv_index[i+1+n],f:H.apparent_temperature[i+1+n],mm:H.precipitation[i+1+n]})),
    days:D.time.map((_,n)=>({date:new Date(D.time[n]+'T12:00'),code:D.weather_code[n],max:D.temperature_2m_max[n],min:D.temperature_2m_min[n],pop:D.precipitation_probability_max[n]||0,wind:D.wind_speed_10m_max[n],gust:D.wind_gusts_10m_max[n],mm:D.precipitation_sum[n],uv:D.uv_index_max[n]}))}}
  catch(e){d=null}
  if(d){try{localStorage.setItem('wb_last',JSON.stringify({n:c.name,t:Date.now(),d}))}catch(e){}}
@@ -313,21 +328,22 @@ function render(c,d){lastC=c;lastD=d;const k=kind(d.code),hr=new Date().getHours
  $('#hrs').innerHTML=d.hours.map(x=>`<div class="hr">${String(x.h).padStart(2,'0')}h<i>${ICON[kind(x.code)]}</i>${T(x.t)}<small>${x.pop}%</small></div>`).join('');
  const lo=Math.min(...d.days.map(x=>x.min)),hi=Math.max(...d.days.map(x=>x.max)),sp=hi-lo||1;
  $('#days').innerHTML=d.days.map(x=>{const kk=kind(x.code);return`<div class="day"><div class="n">${DL(x.date)}</div><div class="i" title="${NAME[kk]}">${ICON[kk]}</div><div class="cn">${NAME[kk]}</div><div class="mx">${T(x.max)}</div><div class="mn">${T(x.min)}</div><div class="rng"><span style="left:${(x.min-lo)/sp*100}%;width:${Math.max(10,(x.max-x.min)/sp*100)}%"></span></div><div class="w">Viento ${WD(x.wind)}<span class="gu">${x.gust!=null?' · ráfaga '+WD(x.gust):''}</span></div><div class="p">Lluvia ${x.pop}%<span class="gu">${x.mm>=.1?' · '+Math.round(x.mm*10)/10+' mm':''}</span></div><div class="uvd">UV ${x.uv!=null?Math.round(x.uv)+' · '+UVL(x.uv):'–'}</div></div>`}).join('');
- paintCmp(d);const m=MAIN&&MAIN.name===c.name&&Math.abs(MAIN.lat-c.lat)<.01;$('#star').textContent=m?'★ Principal':'☆ Hacer principal';$('#star').classList.toggle('on',!!m);
+ paintCmp(d);paintAct(d);const m=isMain(c);$('#star').textContent=m?'★ Principal':'☆ Hacer principal';$('#star').classList.toggle('on',!!m);
  $('#uT').textContent='°'+U.t;$('#uW').textContent={kmh:'km/h',kn:'nudos',ms:'m/s'}[U.w];
  $('#demo').hidden=!d.demo;
  note(d.stale?'Sin conexión. Mostrando datos guardados de las '+new Date(d.stale).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})+'.':d.demo?'Datos de ejemplo: la conexión con Open-Meteo no está disponible desde esta vista previa.':'Datos: Open-Meteo (modelos GFS, ICON y ECMWF).');
  setSky(k,d.day)}
-$('#star').onclick=()=>{MAIN={name:lastC.name,region:lastC.region,lat:lastC.lat,lon:lastC.lon};try{localStorage.setItem('wb_main',JSON.stringify(MAIN))}catch(e){}render(lastC,lastD)};
+$('#star').onclick=()=>{MAIN=lastC.gps?{loc:1}:{name:lastC.name,region:lastC.region,lat:lastC.lat,lon:lastC.lon};try{localStorage.setItem('wb_main',JSON.stringify(MAIN))}catch(e){}render(lastC,lastD)};
 const sv=()=>{try{localStorage.setItem('wb_u',JSON.stringify(U))}catch(e){}render(lastC,lastD)};
 $('#uT').onclick=()=>{U.t=U.t==='C'?'F':'C';sv()};
 $('#uW').onclick=()=>{U.w={kmh:'kn',kn:'ms',ms:'kmh'}[U.w];sv()};
 $('#loc').onclick=()=>{if(!navigator.geolocation)return note('Tu navegador no permite usar la ubicación.');note('Buscando tu ubicación…');
- navigator.geolocation.getCurrentPosition(async p=>{const c={name:'Mi ubicación',region:'',lat:p.coords.latitude,lon:p.coords.longitude};
+ navigator.geolocation.getCurrentPosition(async p=>{const c={name:'Mi ubicación',region:'',lat:p.coords.latitude,lon:p.coords.longitude,gps:1};
   try{const j=await getJSON(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${c.lat}&longitude=${c.lon}&localityLanguage=es`);c.name=j.city||j.locality||c.name;c.region=j.principalSubdivision||''}catch(e){}
   city=c;load(c)},()=>note('No pudimos acceder a tu ubicación. Revisá el permiso del navegador.'),{timeout:8000})};
 $('#chips').innerHTML=Object.keys(NAME).map(k=>`<button data-k="${k}">${ICON[k]} ${NAME[k]}</button>`).join('')+'<button data-k="night">Noche</button>';
-let city=MAIN||{name:'Buenos Aires',region:'Ciudad de Buenos Aires',lat:-34.61,lon:-58.38};
+let LC=null;try{LC=JSON.parse(localStorage.getItem('wb_lastc'))}catch(e){}
+let city=(MAIN&&!MAIN.loc?MAIN:null)||LC||{name:'Buenos Aires',region:'Ciudad de Buenos Aires',lat:-34.61,lon:-58.38};
 let NI=false;
 $('#chips').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;
  if(k==='night'){NI=!NI;render(city,{...demoData(city.lat,kind(lastD.code)),day:!NI});return}
@@ -428,10 +444,50 @@ $('#nav').innerHTML=NV.map(([v,l,p])=>`<button data-v="${v}"${v==='hoy'?' class=
 $('#nav').onclick=e=>{const b=e.target.closest('button');b&&goV(b.dataset.v)};
 $('#v-map').innerHTML='<div class="tabs" id="mt"><button class="on" data-t="w">Viento</button><button data-t="r">Radar</button></div><div id="tw">'+WH+'</div>'+RAD;
 $('#mt').onclick=e=>{const b=e.target.closest('button');b&&mapTab(b.dataset.t)};
+let SAVED=[],CT={},R=[],cT;const MAXC=5;try{SAVED=JSON.parse(localStorage.getItem('wb_saved'))||[]}catch(e){}try{CT=JSON.parse(localStorage.getItem('wb_ct'))||{}}catch(e){}
+const esc=x=>String(x).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])),ck=c=>c.name+'|'+(+c.lat).toFixed(2);
+const isMain=c=>c.gps?(!MAIN||!!MAIN.loc):!!(MAIN&&!MAIN.loc&&MAIN.name===c.name&&Math.abs(MAIN.lat-c.lat)<.01);
+const bt=(on,a,i)=>`<button class="ic" data-a="${a}" data-i="${i}" aria-label="${a==='star'?'Marcar como principal':'Quitar de mis ciudades'}">${a==='star'?(on?'★':'☆'):'✕'}</button>`;
+function rowsHTML(){return`<div class="cr"><button class="cm" data-a="gps">Mi ubicación<small>Usa el GPS</small></button>${bt(!MAIN||MAIN.loc,'star','g')}</div>`+SAVED.map((c,i)=>{const v=CT[ck(c)];return`<div class="cr"><button class="cm" data-a="go" data-i="${i}">${esc(c.name)}<small>${esc(c.region||'Argentina')}</small></button><span class="ct2">${v?ICON[kind(v.c)]+T(v.t):'–'}</span>${bt(MAIN&&!MAIN.loc&&MAIN.name===c.name&&Math.abs(MAIN.lat-c.lat)<.01,'star',i)}${bt(0,'del',i)}</div>`}).join('')}
+function paintSave(){const c=lastC,ok=c&&!c.gps&&!SAVED.some(x=>ck(x)===ck(c));$('#csv').innerHTML=ok?`<button class="go" data-a="save">Guardar «${esc(c.name)}»</button>`:''}
+async function ctemps(){if(!SAVED.length)return;if(lastD&&lastD.demo)SAVED.forEach(c=>CT[ck(c)]={t:Math.round(27-(Math.abs(c.lat)-25)*.6),c:2});else try{const j=await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${SAVED.map(c=>c.lat)}&longitude=${SAVED.map(c=>c.lon)}&current=temperature_2m,weather_code&timezone=auto`);(Array.isArray(j)?j:[j]).forEach((x,i)=>{if(SAVED[i])CT[ck(SAVED[i])]={t:x.current.temperature_2m,c:x.current.weather_code}});try{localStorage.setItem('wb_ct',JSON.stringify(CT))}catch(e){}}catch(e){}
+ if(!ov.hidden&&$('#cl'))$('#cl').innerHTML=rowsHTML()}
+function openCities(){lf=$('#city');$('#sh-t').textContent='Mis ciudades';$('#sb').innerHTML=`<input id="cs" class="cs" type="search" placeholder="Agregar ciudad…" autocomplete="off" aria-label="Buscar ciudad para agregar"><div id="cr"></div><div id="cl">${rowsHTML()}</div><div id="csv"></div><p class="sub">Hasta ${MAXC} ciudades guardadas.</p>`;ov.hidden=false;$('#cs').focus();paintSave();ctemps()}
+function sv2(){try{localStorage.setItem('wb_saved',JSON.stringify(SAVED));localStorage.setItem('wb_main',JSON.stringify(MAIN))}catch(e){}$('#cr').innerHTML='';$('#cs').value='';$('#cl').innerHTML=rowsHTML();paintSave();render(lastC,lastD);ctemps()}
+function addC(c){if(!c)return;if(SAVED.some(x=>ck(x)===ck(c)))return sv2();if(SAVED.length>=MAXC){$('#cr').innerHTML='<p class="sub">Llegaste al máximo de 5 ciudades. Quitá una para agregar otra.</p>';return}SAVED.push({name:c.name,region:c.region,lat:c.lat,lon:c.lon});sv2()}
+async function findCity(v){try{const j=await getJSON(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(v)}&count=5&language=es&countryCode=AR`);return(j.results||[]).map(x=>({name:x.name,region:x.admin1,lat:x.latitude,lon:x.longitude}))}catch(e){return CITIES.filter(c=>norm(c[0]).includes(norm(v))).map(c=>({name:c[0],region:c[3],lat:c[1],lon:c[2]}))}}
+$('#city').onclick=openCities;
+$('#sb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||!$('#cl'))return;const a=b.dataset.a,i=b.dataset.i;
+ if(a==='gps'){closeSheet();$('#loc').click()}
+ else if(a==='go'){const c=SAVED[i];closeSheet();city=c;load(c)}
+ else if(a==='star'){MAIN=i==='g'?{loc:1}:{name:SAVED[i].name,region:SAVED[i].region,lat:SAVED[i].lat,lon:SAVED[i].lon};sv2()}
+ else if(a==='del'){const c=SAVED.splice(+i,1)[0];if(MAIN&&!MAIN.loc&&MAIN.name===c.name)MAIN={loc:1};sv2()}
+ else if(a==='save')addC(lastC);else if(a==='add')addC(R[+i])});
+$('#sb').addEventListener('input',e=>{if(e.target.id!=='cs')return;clearTimeout(cT);const v=e.target.value.trim();if(v.length<2){$('#cr').innerHTML='';return}cT=setTimeout(async()=>{R=await findCity(v);if(!$('#cr'))return;$('#cr').innerHTML=R.length?R.map((c,i)=>`<button class="cm" data-a="add" data-i="${i}">${esc(c.name)}<small>${esc(c.region||'Argentina')}</small></button>`).join(''):'<p class="sub">No encontramos esa ciudad.</p>'},250)});
+let ACTR=null;
+const pn=(v,a,b,s)=>v<a?Math.min(1,(a-v)/s):v>b?Math.min(1,(v-b)/s):0,rn=x=>Math.min(1,Math.max(x.pop/70,x.mm>.2?1:0));
+const ACT=[
+{n:'Salir a correr',h:[6,22],r:[8,20],tip:'Lo ideal: sensación térmica de 8° a 20°, viento hasta 20 km/h, sin lluvia y UV bajo.',f:x=>100-45*pn(x.f,8,20,10)-70*rn(x)-20*pn(x.w,0,20,25)-15*pn(x.uv||0,0,5,5)},
+{n:'Andar en bici',h:[6,21],r:[10,26],tip:'Lo ideal: sensación térmica de 10° a 26°, viento suave (hasta 18 km/h) y sin lluvia.',f:x=>100-35*pn(x.f,10,26,10)-70*rn(x)-35*pn(x.w,0,18,22)-10*pn(x.uv||0,0,7,5)},
+{n:'Pileta o playa',h:[10,19],r:[26,45],tip:'Lo ideal: calor (sensación de 26° o más), poco viento y sin lluvia. Con UV alto, protector.',f:x=>100-45*pn(x.f,26,45,10)-60*rn(x)-15*pn(x.w,0,25,25)},
+{n:'Asado o comer afuera',h:[11,23],r:[14,30],tip:'Lo ideal: sensación de 14° a 30°, poco viento (para el fuego) y sin lluvia.',f:x=>100-35*pn(x.f,14,30,10)-70*rn(x)-25*pn(x.w,0,25,25)},
+{n:'Fútbol, tenis y deportes al aire libre',h:[8,22],r:[10,27],tip:'Lo ideal: sensación de 10° a 27°, viento hasta 25 km/h (para el tenis), cancha seca y UV moderado.',f:x=>100-40*pn(x.f,10,27,10)-70*rn(x)-20*pn(x.w,0,25,25)-10*pn(x.uv||0,0,7,5)}];
+const LV=s=>s>=80?['Excelente','l0']:s>=60?['Buena','l3']:s>=40?['Regular','l1']:['Mala','l2'];
+function best(a,HS){const sc=HS.map(x=>x.h>=a.h[0]&&x.h<=a.h[1]?(x.code>=95?0:Math.max(0,Math.round(a.f(x)))):-1);let bi=-1,bs=-1;sc.forEach((v,i)=>{if(v<0)return;const m=(v+(sc[i+1]>=0?sc[i+1]:v))/2;if(m>bs){bs=m;bi=i}});return{sc,bi,bs:Math.round(bs),two:bi>=0&&sc[bi+1]>=0}}
+const rsn=(a,x,s)=>(x.f<a.r[0]?'Está fresco':x.f>a.r[1]?'Hace calor':'Buena temperatura')+', '+(x.w>25?'con viento fuerte':x.w>15?'algo de viento':'sin viento')+(rn(x)>.4?' y con probabilidad de lluvia':'')+(s>=80?'. ¡A aprovechar!':'.');
+function ropa(HS){const f=HS[0].f,n=HS.slice(0,12),e=[];if(n.some(y=>rn(y)>.6))e.push('paraguas');if(n.some(y=>y.w>35))e.push('cortaviento');if(n.some(y=>(y.uv||0)>=6))e.push('lentes y protector');
+ return(f<5?'Abrigo grueso, gorro y bufanda':f<12?'Campera abrigada':f<18?'Buzo o campera liviana':f<25?'Remera y algo liviano':f<30?'Remera y ropa fresca':'Ropa liviana y mucha agua')+(e.length?', más '+e.join(', ').replace(/, ([^,]*)$/,' y $1'):'')+'.'}
+function paintAct(d){const el=$('#actb');if(!d.hours||d.hours[0].w==null){el.innerHTML='<p class="sub">Conectate para ver las recomendaciones de hoy.</p>';ACTR=null;return}
+ let tm=false;const HS=d.hours.map((x,n)=>{if(n&&x.h<d.hours[n-1].h)tm=true;return{...x,tom:tm}});
+ const R=ACT.map(a=>{const b=best(a,HS),x=HS[Math.max(0,b.bi)];return{a,...b,x,l:LV(b.bs),win:hh(x.h)+' a '+hh((x.h+(b.two?2:1))%24)+' h'+(x.tom?' (mañana)':'')}});ACTR={R,HS};
+ const t=R.reduce((p,q)=>q.bs>p.bs?q:p);
+ el.innerHTML=`<div class="hl"><small>Lo mejor para hoy</small>${t.bs>=50?`<div class="hn">${t.a.n}</div><div class="hw">${t.win}</div><p>${rsn(t.a,t.x,t.bs)}</p>`:'<div class="hn">Plan de sillón y mate</div><p>Ninguna actividad al aire libre llega a un buen puntaje en las próximas 24 horas.</p>'}</div><div class="acts">`+R.map((r,i)=>`<button class="ac" data-act="${i}"><div class="at2"><b>${r.a.n}</b><span><i class="cf ${r.l[1]}"></i>${r.l[0]}</span></div><div class="aw">Mejor momento: ${r.win}</div><p>${rsn(r.a,r.x,r.bs)}</p></button>`).join('')+`<div class="ac"><div class="at2"><b>Qué ropa llevar</b></div><p>${ropa(HS)}</p></div></div>`}
+$('#actb').onclick=e=>{const b=e.target.closest('[data-act]');if(!b||!ACTR)return;const r=ACTR.R[+b.dataset.act],HS=ACTR.HS;lf=b;$('#sh-t').textContent=r.a.n;
+ $('#sb').innerHTML=`<p><b>${r.l[0]}</b>. Mejor momento: ${r.win}.</p><p class="sub">${r.a.tip}</p><div class="bs">${r.sc.map((v,i)=>`<div style="height:${Math.max(3,v)}%;background:${v<0?'rgba(255,255,255,.15)':v>=80?'#4cc38a':v>=60?'#9bd36a':v>=40?'#f2d04b':'#ff8a4d'}" title="${hh(HS[i].h)} h: ${v<0?'fuera de horario':v+' puntos'}"></div>`).join('')}</div><div class="bl"><span>${hh(HS[0].h)}h</span><span>${hh(HS[12].h)}h</span><span>${hh(HS[23].h)}h</span></div><p class="sub">Cada barra es una hora: cuanto más alta y verde, mejor. Las grises quedan fuera de un horario razonable. Son criterios orientativos, no una regla exacta.</p>`;ov.hidden=false;$('#sx').focus()};
 $('#days').onclick=e=>{const el=e.target.closest('.day[data-cf]');if(!el)return;const i=+el.dataset.cf;lf=el;$('#sh-t').textContent='Qué dicen los modelos · '+DL(lastD.days[i].date);$('#sb').innerHTML=cmpHTML(lastD.cmp[i]);ov.hidden=false;$('#sx').focus()};
 $('#days').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){const el=e.target.closest('.day[data-cf]');if(el){e.preventDefault();el.click()}}};
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
-size();setSky('clear',true);load(city);
+size();setSky('clear',true);load(city);if(!MAIN||MAIN.loc)$('#loc').click();
 </script>
 </body>
 </html>
