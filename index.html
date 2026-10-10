@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Weather Bro</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#123f7a">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Weather Bro">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
 <style>
 @property --a{syntax:'<color>';inherits:false;initial-value:#1668c8}
@@ -236,7 +243,9 @@ async function load(c,fk){let d;
   d={demo:false,temp:C.temperature_2m,feel:C.apparent_temperature,wind:C.wind_speed_10m,hum:C.relative_humidity_2m,code:C.weather_code,day:!!C.is_day,uv:D.uv_index_max[0],pres:C.pressure_msl,vis:H.visibility[i],sr:D.sunrise[0].slice(11,16),ss:D.sunset[0].slice(11,16),rain:D.precipitation_sum[0],
    hours:H.time.slice(i+1,i+25).map((t,n)=>({h:+t.slice(11,13),code:H.weather_code[i+1+n],t:H.temperature_2m[i+1+n],pop:H.precipitation_probability[i+1+n]||0})),
    days:[1,2,3].map(n=>({date:new Date(D.time[n]+'T12:00'),code:D.weather_code[n],max:D.temperature_2m_max[n],min:D.temperature_2m_min[n],pop:D.precipitation_probability_max[n]||0,wind:D.wind_speed_10m_max[n]}))}}
- catch(e){d=demoData(c.lat,fk)}
+ catch(e){d=null}
+ if(d){try{localStorage.setItem('wb_last',JSON.stringify({n:c.name,t:Date.now(),d}))}catch(e){}}
+ else{try{const o=JSON.parse(localStorage.getItem('wb_last'));if(o&&o.n===c.name){d=o.d;d.days.forEach(x=>x.date=new Date(x.date));d.stale=o.t}}catch(e){}if(!d)d=demoData(c.lat,fk)}
  render(c,d)}
 function phrase(k,d){const n=!d.day,t=d.temp;
  if(k==='storm')return'Hoy mejor quedate adentro';
@@ -263,7 +272,7 @@ function render(c,d){lastC=c;lastD=d;const k=kind(d.code),hr=new Date().getHours
  const m=MAIN&&MAIN.name===c.name&&Math.abs(MAIN.lat-c.lat)<.01;$('#star').textContent=m?'★ Principal':'☆ Hacer principal';$('#star').classList.toggle('on',!!m);
  $('#uT').textContent='°'+U.t;$('#uW').textContent={kmh:'km/h',kn:'nudos',ms:'m/s'}[U.w];
  $('#demo').hidden=!d.demo;
- note(d.demo?'Datos de ejemplo: la conexión con Open-Meteo no está disponible desde esta vista previa.':'Datos: Open-Meteo (modelos GFS, ICON y ECMWF).');
+ note(d.stale?'Sin conexión. Mostrando datos guardados de las '+new Date(d.stale).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})+'.':d.demo?'Datos de ejemplo: la conexión con Open-Meteo no está disponible desde esta vista previa.':'Datos: Open-Meteo (modelos GFS, ICON y ECMWF).');
  setSky(k,d.day)}
 $('#star').onclick=()=>{MAIN={name:lastC.name,region:lastC.region,lat:lastC.lat,lon:lastC.lon};try{localStorage.setItem('wb_main',JSON.stringify(MAIN))}catch(e){}render(lastC,lastD)};
 const sv=()=>{try{localStorage.setItem('wb_u',JSON.stringify(U))}catch(e){}render(lastC,lastD)};
@@ -366,6 +375,7 @@ function closeSheet(){WM&&WM.stop();WM=null;ov.hidden=true;lf&&lf.focus()}
 document.querySelector('.stats').onclick=e=>{const b=e.target.closest('button[data-d]');if(!b)return;const [t,h]=detail(b.dataset.d==='ss'?'sr':b.dataset.d);$('#sh-t').textContent=t;$('#sb').innerHTML=h;lf=b;ov.hidden=false;$('#sx').focus();if(b.dataset.d==='w')initWind();if(b.dataset.d==='rn')initRain()};
 $('#sx').onclick=closeSheet;ov.onclick=e=>{if(e.target===ov)closeSheet()};
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!ov.hidden)closeSheet()});
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 size();setSky('clear',true);load(city);
 </script>
 </body>
