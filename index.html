@@ -205,6 +205,10 @@ details{border-bottom:1px solid rgba(255,255,255,.16);padding:12px 0}summary{cur
 .ic-drizzle,.ic-rain,.ic-storm,.ic-snow{color:#c5d0df}.ic-drizzle .a{stroke:#8fd0ff}.ic-rain .a{stroke:#5ba8f0}.ic-storm .a{stroke:#ffd166}.ic-snow .a{stroke:#e8f6ff;stroke-width:3}
 .temp{display:flex;align-items:center;gap:12px}.temp sup{align-self:flex-start}.wi svg{width:clamp(52px,15vw,84px);height:auto;display:block}
 @media(max-width:899px){.day{column-gap:12px}.day .rng{margin:0 6px}}
+.wi{display:flex;flex-direction:column;align-items:center;gap:4px}
+.wi .desc{display:block;color:#fff;font-size:14px;font-weight:500;line-height:1.2;text-align:center;max-width:120px;opacity:.9}
+@media(max-width:380px){.wi svg{width:48px}.wi .desc{max-width:92px;font-size:13px}}
+.wi{letter-spacing:normal}.wi .desc{letter-spacing:normal;word-spacing:normal}
 </style>
 </head>
 <body>
@@ -223,8 +227,7 @@ details{border-bottom:1px solid rgba(255,255,255,.16);padding:12px 0}summary{cur
     <button class="city cb" id="city" aria-label="Mis ciudades">Buenos Aires</button>
     <div class="sub" id="reg">Ciudad de Buenos Aires</div>
     <div class="bar"><button id="loc">Mi ubicación</button></div>
-    <div class="temp"><span id="t">--</span><sup>°</sup><span class="wi" id="wi" aria-hidden="true"></span></div>
-    <div class="desc" id="d">Cargando…</div>
+    <div class="temp"><span id="t">--</span><sup>°</sup><span class="wi" id="wi"><span id="wic" aria-hidden="true"></span><span class="desc" id="d">Cargando…</span></span></div>
     <div class="side"><button class="alb" id="alb" hidden></button><div class="stats">
       <button data-d="fl"><small>Sensación</small><strong id="fl">--</strong></button>
       <button data-d="w"><small>Viento</small><strong id="w">--</strong></button>
@@ -359,7 +362,7 @@ function render(c,d){lastC=c;lastD=d;const k=kind(d.code),hr=new Date().getHours
  $('#gr').textContent=hr>=5&&hr<12?'¡Buen día, bro!':hr>=12&&hr<20?'¿Qué hacés, bro?':'Buenas noches, bro';
  $('#ph').textContent=phrase(k,d);
  $('#city').textContent=c.name;$('#reg').textContent=c.region||'Argentina';
- $('#t').textContent=T(d.temp).slice(0,-1);$('#d').textContent=NAME[k];$('#wi').className='wi ic-'+k;$('#wi').innerHTML=ICON[k];
+ $('#t').textContent=T(d.temp).slice(0,-1);$('#d').textContent=NAME[k];$('#wi').className='wi ic-'+k;$('#wic').innerHTML=ICON[k];
  $('#fl').textContent=T(d.feel);$('#w').textContent=WD(d.wind);$('#h').textContent=d.hum+'%';
  $('#uv').textContent=Math.round(d.uv)+' · '+UVL(d.uv);$('#pr').textContent=PR(d.pres);$('#vi').textContent=Math.round(d.vis/100)/10+' km';$('#sr').textContent=TF(d.sr);$('#ss').textContent=TF(d.ss);$('#rn').textContent=Math.round(d.rain*10)/10+' mm';
  $('#hrs').innerHTML=d.hours.map(x=>`<div class="hr">${HF(x.h)}<i class="ic-${kind(x.code)}">${ICON[kind(x.code)]}</i>${T(x.t)}<small>${x.pop}%</small></div>`).join('');
