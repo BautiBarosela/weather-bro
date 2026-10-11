@@ -201,6 +201,10 @@ details{border-bottom:1px solid rgba(255,255,255,.16);padding:12px 0}summary{cur
 .sheet label,#fb label{display:block;margin:14px 0 4px;font-size:13px;opacity:.8}
 #fb select,#fb textarea,#fb input[type=email]{width:100%;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:#12233f;color:#fff;padding:11px 12px;font:400 15px 'Inter',system-ui,sans-serif}
 #fb textarea{resize:vertical}#fb select:focus-visible,#fb textarea:focus-visible,#fb input:focus-visible{outline:2px solid var(--sun)}.hp{position:absolute;left:-9999px;width:1px;height:1px}
+.ic-clear{color:#ffd166}.ic-partly{color:#d5deea}.ic-partly .a{stroke:#ffd166}.ic-cloud{color:#c5d0df}.ic-fog{color:#b3bfcc}
+.ic-drizzle,.ic-rain,.ic-storm,.ic-snow{color:#c5d0df}.ic-drizzle .a{stroke:#8fd0ff}.ic-rain .a{stroke:#5ba8f0}.ic-storm .a{stroke:#ffd166}.ic-snow .a{stroke:#e8f6ff;stroke-width:3}
+.temp{display:flex;align-items:center;gap:12px}.temp sup{align-self:flex-start}.wi svg{width:clamp(52px,15vw,84px);height:auto;display:block}
+@media(max-width:899px){.day{column-gap:12px}.day .rng{margin:0 6px}}
 </style>
 </head>
 <body>
@@ -219,7 +223,7 @@ details{border-bottom:1px solid rgba(255,255,255,.16);padding:12px 0}summary{cur
     <button class="city cb" id="city" aria-label="Mis ciudades">Buenos Aires</button>
     <div class="sub" id="reg">Ciudad de Buenos Aires</div>
     <div class="bar"><button id="loc">Mi ubicación</button></div>
-    <div class="temp"><span id="t">--</span><sup>°</sup></div>
+    <div class="temp"><span id="t">--</span><sup>°</sup><span class="wi" id="wi" aria-hidden="true"></span></div>
     <div class="desc" id="d">Cargando…</div>
     <div class="side"><button class="alb" id="alb" hidden></button><div class="stats">
       <button data-d="fl"><small>Sensación</small><strong id="fl">--</strong></button>
@@ -267,7 +271,7 @@ const NIGHT={clear:['#0b1a33','#18325e'],partly:['#0e1d38','#223a68'],cloud:['#1
 const NAME={clear:'Despejado',partly:'Parcialmente nublado',cloud:'Nublado',fog:'Niebla',drizzle:'Llovizna',rain:'Lluvia',storm:'Tormenta',snow:'Nieve'};
 const S=p=>`<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
 const CL='<path d="M7 18h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7.1 8.6 4.7 4.7 0 0 0 7 18z"/>',CU='<path d="M7 14h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7.1 4.6 4.7 4.7 0 0 0 7 14z"/>';
-const ICON={clear:S('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'),partly:S('<circle cx="8" cy="8" r="3"/><path d="M8 2v1M2 8h1M3.8 3.8l.7.7M12.2 3.8l-.7.7"/><path d="M9 21h8a3.5 3.5 0 0 0 .5-6.96A4.8 4.8 0 0 0 8.4 14 3.5 3.5 0 0 0 9 21z"/>'),cloud:S(CL),fog:S('<path d="M4 8h16M3 12h18M5 16h14"/>'),drizzle:S(CU+'<path d="M8 17v1.5M12 17v1.5M16 17v1.5M10 20.5v1M14 20.5v1"/>'),rain:S(CU+'<path d="M8 17l-1 3M12 17l-1 3M16 17l-1 3"/>'),storm:S(CU+'<path d="M13 14l-3 4h4l-3 4"/>'),snow:S(CU+'<path d="M8 18h.01M12 18h.01M16 18h.01M10 21h.01M14 21h.01"/>')};
+const ICON={clear:S('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'),partly:S('<g class="a"><circle cx="8" cy="8" r="3"/><path d="M8 2v1M2 8h1M3.8 3.8l.7.7M12.2 3.8l-.7.7"/></g><path d="M9 21h8a3.5 3.5 0 0 0 .5-6.96A4.8 4.8 0 0 0 8.4 14 3.5 3.5 0 0 0 9 21z"/>'),cloud:S(CL),fog:S('<path d="M4 8h16M3 12h18M5 16h14"/>'),drizzle:S(CU+'<path class="a" d="M8 17v1.5M12 17v1.5M16 17v1.5M10 20.5v1M14 20.5v1"/>'),rain:S(CU+'<path class="a" d="M8 17l-1 3M12 17l-1 3M16 17l-1 3"/>'),storm:S(CU+'<path class="a" d="M13 14l-3 4h4l-3 4"/>'),snow:S(CU+'<path class="a" d="M8 18h.01M12 18h.01M16 18h.01M10 21h.01M14 21h.01"/>')};
 function kind(c){if(c===0)return'clear';if(c<=2)return'partly';if(c===3)return'cloud';if(c<=48)return'fog';if(c<=57)return'drizzle';if(c<=67||(c>=80&&c<=82))return'rain';if(c<=77||c===85||c===86)return'snow';return'storm'}
 const CODE={clear:0,partly:2,cloud:3,fog:45,drizzle:53,rain:61,storm:95,snow:73};
 let cur={k:'clear',day:true};
@@ -326,7 +330,7 @@ function demoData(lat,k){const base=Math.round(27-(Math.abs(lat)-25)*.6),seq=['p
  return{demo:true,temp:base,feel:base-1,wind:k==='storm'?45:14,hum:62,code:CODE[k||'clear'],day:true,uv:6,pres:1014,vis:10000,sr:'06:52',ss:'19:41',rain:k==='rain'?8:0,
   hours:Array.from({length:24},(_,i)=>({h:(h0+i+1)%24,code:CODE[k||'clear'],t:base+4*Math.sin((h0+i-9)/24*6.28),pop:k==='rain'?70:10,w:10+(i%7)*3,uv:Math.max(0,Math.round(8*Math.sin((((h0+i+1)%24)-6)/12*Math.PI))),f:base+4*Math.sin((h0+i-9)/24*6.28)-1,mm:k==='rain'?1:0})),
   days:[0,1,2,3,4,5,6].map(i=>{const kk=seq[(i+Math.round(Math.abs(lat)))%4];return{date:new Date(Date.now()+i*864e5),code:CODE[kk],max:base+3-i%4,min:base-7+i%4,pop:kk==='rain'?70:kk==='cloud'?25:5,wind:20+i*3,gust:35+i*3,mm:kk==='rain'?6:0,uv:7-i%3}})}}
-async function load(c,fk){let d;try{localStorage.setItem('wb_lastc',JSON.stringify(c))}catch(e){}
+async function load(c,fk){LU=Date.now();let d;try{localStorage.setItem('wb_lastc',JSON.stringify(c))}catch(e){}
  try{const j=await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day,pressure_msl&hourly=temperature_2m,precipitation_probability,weather_code,visibility,wind_speed_10m,uv_index,apparent_temperature,precipitation&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max&timezone=auto&forecast_days=7`);
   const H=j.hourly,D=j.daily,C=j.current,i=Math.max(0,H.time.findIndex(t=>t>C.time)-1);
   d={demo:false,temp:C.temperature_2m,feel:C.apparent_temperature,wind:C.wind_speed_10m,hum:C.relative_humidity_2m,code:C.weather_code,day:!!C.is_day,uv:D.uv_index_max[0],pres:C.pressure_msl,vis:H.visibility[i],sr:D.sunrise[0].slice(11,16),ss:D.sunset[0].slice(11,16),rain:D.precipitation_sum[0],
@@ -355,16 +359,16 @@ function render(c,d){lastC=c;lastD=d;const k=kind(d.code),hr=new Date().getHours
  $('#gr').textContent=hr>=5&&hr<12?'¡Buen día, bro!':hr>=12&&hr<20?'¿Qué hacés, bro?':'Buenas noches, bro';
  $('#ph').textContent=phrase(k,d);
  $('#city').textContent=c.name;$('#reg').textContent=c.region||'Argentina';
- $('#t').textContent=T(d.temp).slice(0,-1);$('#d').textContent=NAME[k];
+ $('#t').textContent=T(d.temp).slice(0,-1);$('#d').textContent=NAME[k];$('#wi').className='wi ic-'+k;$('#wi').innerHTML=ICON[k];
  $('#fl').textContent=T(d.feel);$('#w').textContent=WD(d.wind);$('#h').textContent=d.hum+'%';
  $('#uv').textContent=Math.round(d.uv)+' · '+UVL(d.uv);$('#pr').textContent=PR(d.pres);$('#vi').textContent=Math.round(d.vis/100)/10+' km';$('#sr').textContent=TF(d.sr);$('#ss').textContent=TF(d.ss);$('#rn').textContent=Math.round(d.rain*10)/10+' mm';
- $('#hrs').innerHTML=d.hours.map(x=>`<div class="hr">${HF(x.h)}<i>${ICON[kind(x.code)]}</i>${T(x.t)}<small>${x.pop}%</small></div>`).join('');
+ $('#hrs').innerHTML=d.hours.map(x=>`<div class="hr">${HF(x.h)}<i class="ic-${kind(x.code)}">${ICON[kind(x.code)]}</i>${T(x.t)}<small>${x.pop}%</small></div>`).join('');
  const lo=Math.min(...d.days.map(x=>x.min)),hi=Math.max(...d.days.map(x=>x.max)),sp=hi-lo||1;
- $('#days').innerHTML=d.days.map(x=>{const kk=kind(x.code);return`<div class="day"><div class="n">${DL(x.date)}</div><div class="i" title="${NAME[kk]}">${ICON[kk]}</div><div class="cn">${NAME[kk]}</div><div class="mx">${T(x.max)}</div><div class="mn">${T(x.min)}</div><div class="rng"><span style="left:${(x.min-lo)/sp*100}%;width:${Math.max(10,(x.max-x.min)/sp*100)}%"></span></div><div class="w">Viento ${WD(x.wind)}<span class="gu">${x.gust!=null?' · ráfaga '+WD(x.gust):''}</span></div><div class="p">Lluvia ${x.pop}%<span class="gu">${x.mm>=.1?' · '+Math.round(x.mm*10)/10+' mm':''}</span></div><div class="uvd">UV ${x.uv!=null?Math.round(x.uv)+' · '+UVL(x.uv):'–'}</div></div>`}).join('');
+ $('#days').innerHTML=d.days.map(x=>{const kk=kind(x.code);return`<div class="day"><div class="n">${DL(x.date)}</div><div class="i ic-${kk}" title="${NAME[kk]}">${ICON[kk]}</div><div class="cn">${NAME[kk]}</div><div class="mx">${T(x.max)}</div><div class="mn">${T(x.min)}</div><div class="rng"><span style="left:${(x.min-lo)/sp*100}%;width:${Math.max(10,(x.max-x.min)/sp*100)}%"></span></div><div class="w">Viento ${WD(x.wind)}<span class="gu">${x.gust!=null?' · ráfaga '+WD(x.gust):''}</span></div><div class="p">Lluvia ${x.pop}%<span class="gu">${x.mm>=.1?' · '+Math.round(x.mm*10)/10+' mm':''}</span></div><div class="uvd">UV ${x.uv!=null?Math.round(x.uv)+' · '+UVL(x.uv):'–'}</div></div>`}).join('');
  paintCmp(d);paintAct(d);paintAlert(d);const m=isMain(c);$('#star').textContent=m?'★ Principal':'☆ Hacer principal';$('#star').classList.toggle('on',!!m);
  $('#uP').textContent=U.p==='mm'?'mmHg':'hPa';$('#uH').textContent=U.h==='12'?'12 h':'24 h';$('#uT').textContent='°'+U.t;$('#uW').textContent={kmh:'km/h',kn:'nudos',ms:'m/s'}[U.w];
  $('#demo').hidden=!d.demo;
- note(d.stale?'Sin conexión. Mostrando datos guardados de las '+new Date(d.stale).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})+'.':d.demo?'Datos de ejemplo: la conexión con Open-Meteo no está disponible desde esta vista previa.':'Datos: Open-Meteo (modelos GFS, ICON y ECMWF).');
+ note(d.stale?'Sin conexión. Mostrando datos guardados de las '+new Date(d.stale).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})+'.':d.demo?'Datos de ejemplo: la conexión con Open-Meteo no está disponible desde esta vista previa.':'Datos: Open-Meteo (modelos GFS, ICON y ECMWF). Actualizado a las '+new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit',hour12:U.h==='12'})+'.');
  setSky(k,d.day)}
 $('#star').onclick=()=>{MAIN=lastC.gps?{loc:1}:{name:lastC.name,region:lastC.region,lat:lastC.lat,lon:lastC.lon};try{localStorage.setItem('wb_main',JSON.stringify(MAIN))}catch(e){}render(lastC,lastD)};
 const sv=()=>{try{localStorage.setItem('wb_u',JSON.stringify(U))}catch(e){}render(lastC,lastD)};
@@ -481,7 +485,7 @@ let SAVED=[],CT={},R=[],cT;const MAXC=5;try{SAVED=JSON.parse(localStorage.getIte
 const esc=x=>String(x).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])),ck=c=>c.name+'|'+(+c.lat).toFixed(2);
 const isMain=c=>c.gps?(!MAIN||!!MAIN.loc):!!(MAIN&&!MAIN.loc&&MAIN.name===c.name&&Math.abs(MAIN.lat-c.lat)<.01);
 const bt=(on,a,i)=>`<button class="ic" data-a="${a}" data-i="${i}" aria-label="${a==='star'?'Marcar como principal':'Quitar de mis ciudades'}">${a==='star'?(on?'★':'☆'):'✕'}</button>`;
-function rowsHTML(){return`<div class="cr"><button class="cm" data-a="gps">Mi ubicación<small>Usa el GPS</small></button>${bt(!MAIN||MAIN.loc,'star','g')}</div>`+SAVED.map((c,i)=>{const v=CT[ck(c)];return`<div class="cr"><button class="cm" data-a="go" data-i="${i}">${esc(c.name)}<small>${esc(c.region||'Argentina')}</small></button><span class="ct2">${v?ICON[kind(v.c)]+T(v.t):'–'}</span>${bt(MAIN&&!MAIN.loc&&MAIN.name===c.name&&Math.abs(MAIN.lat-c.lat)<.01,'star',i)}${bt(0,'del',i)}</div>`}).join('')}
+function rowsHTML(){return`<div class="cr"><button class="cm" data-a="gps">Mi ubicación<small>Usa el GPS</small></button>${bt(!MAIN||MAIN.loc,'star','g')}</div>`+SAVED.map((c,i)=>{const v=CT[ck(c)];return`<div class="cr"><button class="cm" data-a="go" data-i="${i}">${esc(c.name)}<small>${esc(c.region||'Argentina')}</small></button><span class="ct2">${v?'<i class="ic-'+kind(v.c)+'">'+ICON[kind(v.c)]+'</i>'+T(v.t):'–'}</span>${bt(MAIN&&!MAIN.loc&&MAIN.name===c.name&&Math.abs(MAIN.lat-c.lat)<.01,'star',i)}${bt(0,'del',i)}</div>`}).join('')}
 function paintSave(){const c=lastC,ok=c&&!c.gps&&!SAVED.some(x=>ck(x)===ck(c));$('#csv').innerHTML=ok?`<button class="go" data-a="save">Guardar «${esc(c.name)}»</button>`:''}
 async function ctemps(){if(!SAVED.length)return;if(lastD&&lastD.demo)SAVED.forEach(c=>CT[ck(c)]={t:Math.round(27-(Math.abs(c.lat)-25)*.6),c:2});else try{const j=await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${SAVED.map(c=>c.lat)}&longitude=${SAVED.map(c=>c.lon)}&current=temperature_2m,weather_code&timezone=auto`);(Array.isArray(j)?j:[j]).forEach((x,i)=>{if(SAVED[i])CT[ck(SAVED[i])]={t:x.current.temperature_2m,c:x.current.weather_code}});try{localStorage.setItem('wb_ct',JSON.stringify(CT))}catch(e){}}catch(e){}
  if(!ov.hidden&&$('#cl'))$('#cl').innerHTML=rowsHTML()}
@@ -544,6 +548,13 @@ $('#fb').addEventListener('submit',async e=>{e.preventDefault();const r=$('#fbr'
  try{const fd=new FormData($('#fb'));fd.append('dispositivo',navigator.userAgent);const x=await fetch(FORM_ENDPOINT,{method:'POST',body:fd,headers:{Accept:'application/json'}});if(!x.ok)throw 0;r.textContent='¡Gracias! Recibimos tu comentario.';$('#fb').reset()}catch(err){r.textContent='No pudimos enviarlo. Revisá tu conexión e intentá de nuevo.'}b.disabled=false});
 $('#days').onclick=e=>{const el=e.target.closest('.day[data-cf]');if(!el)return;const i=+el.dataset.cf;lf=el;$('#sh-t').textContent='Qué dicen los modelos · '+DL(lastD.days[i].date);$('#sb').innerHTML=cmpHTML(lastD.cmp[i]);ov.hidden=false;$('#sx').focus()};
 $('#days').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){const el=e.target.closest('.day[data-cf]');if(el){e.preventDefault();el.click()}}};
+let LU=0;const REF=15*60e3;
+function refresh(force){if(!lastC||document.hidden)return;const age=Date.now()-LU;if(!force&&age<REF)return;
+ try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update())}catch(e){}
+ if(lastC.gps&&age>2*REF)$('#loc').click();else load(lastC)}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh(false)});
+addEventListener('online',()=>refresh(true));addEventListener('pageshow',e=>{if(e.persisted)refresh(false)});
+setInterval(()=>refresh(false),60e3);
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 size();setSky('clear',true);load(city);if(!MAIN||MAIN.loc)$('#loc').click();
 </script>
