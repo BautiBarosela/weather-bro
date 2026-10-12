@@ -291,7 +291,8 @@ const PH={
 'it-IT':{loc:'it-IT',tag:', bro',tw:'bro',g0:'Buongiorno{t}!',g1:'Buon pomeriggio{t}!',g2:'Buonasera{t}!',p_cd:'Giornata da occhiali da sole 😎',p_pd:'Occhiali da sole a portata di mano, per sicurezza',p_kd:'Né sole né pioggia, tranquillo',p_rd:"Prendi l'ombrello",p_dd:'Pioviggina: basta una giacca leggera',p_st:'Oggi meglio restare in casa',p_sd:'Giornata di neve! Copriti bene',p_fg:'Nebbia: occhio alla strada, si vede poco',p_wd:'Oggi tira vento, attento',p_hd:'Fa un caldo bestiale, bevi tanta acqua',p_ld:'Copriti bene, fa un freddo cane',p_rn:'Notte bagnata, ombrello obbligatorio',p_dn:'Notte di pioggerella, esci con il cappuccio',p_sn:'Notte di neve, copriti bene',p_hn:'Notte calda, vestiti leggero',p_ln:'Stasera si esce coperti',p_kn:'Notte coperta, senza stelle',p_cm:'Serata ideale per uscire',p_cs:'Notte di stelle',p_ps:'Stelle tra le nuvole'}};
 const D={'es-AR':{...LB.es,...PH['es-AR']},'es-ES':{...LB.es,...PH['es-ES']},'en-AU':{...LB.en,...PH['en-AU']},'en-US':{...LB.en,...PH['en-US']},'it-IT':{...LB.it,...PH['it-IT']}};
 const LGN={'es-AR':'Español (Argentina)','es-ES':'Español (España)','en-AU':'English (Australia)','en-US':'English (US)','it-IT':'Italiano'};
-const pickL=l=>{l=(l||'').toLowerCase();return/^es-es/.test(l)?'es-ES':l.startsWith('es')?'es-AR':l.startsWith('en-au')?'en-AU':l.startsWith('en')?'en-US':l.startsWith('it')?'it-IT':'es-AR'};
+const SPTZ=()=>{try{return/^(Europe\/Madrid|Atlantic\/Canary|Africa\/Ceuta)$/.test(Intl.DateTimeFormat().resolvedOptions().timeZone)}catch(e){return false}};
+const pickL=l=>{l=(l||'').toLowerCase();return(/^es-es/.test(l)||l==='es')?(SPTZ()?'es-ES':'es-AR'):l.startsWith('es')?'es-AR':l.startsWith('en-au')?'en-AU':l.startsWith('en')?'en-US':l.startsWith('it')?'it-IT':'es-AR'};
 let LP='auto';try{LP=localStorage.getItem('wb_lang')||'auto'}catch(e){}
 let CUR=D[LP]||D[pickL(navigator.language)];
 const tr=k=>CUR[k]!=null?CUR[k]:D['es-AR'][k]!=null?D['es-AR'][k]:k,LOC=()=>CUR.loc;
