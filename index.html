@@ -443,7 +443,7 @@ async function load(c,fk){LU=Date.now();let d;try{localStorage.setItem('wb_lastc
    days:D.time.map((_,n)=>({date:new Date(D.time[n]+'T12:00'),code:D.weather_code[n],max:D.temperature_2m_max[n],min:D.temperature_2m_min[n],pop:D.precipitation_probability_max[n]||0,wind:D.wind_speed_10m_max[n],gust:D.wind_gusts_10m_max[n],mm:D.precipitation_sum[n],uv:D.uv_index_max[n]}))}}
  catch(e){d=null}
  if(d){try{localStorage.setItem('wb_last',JSON.stringify({n:c.name,t:Date.now(),d}))}catch(e){}}
- else{try{const o=JSON.parse(localStorage.getItem('wb_last'));if(o&&o.n===c.name){d=o.d;d.days.forEach(x=>x.date=new Date(x.date));d.stale=o.t}}catch(e){}if(!d)d=demoData(c.lat,fk)}
+ else{LU=Date.now()-REF+30e3;try{const o=JSON.parse(localStorage.getItem('wb_last'));if(o&&o.n===c.name){d=o.d;d.days.forEach(x=>x.date=new Date(x.date));d.stale=o.t}}catch(e){}if(!d)d=demoData(c.lat,fk)}
  if(d.demo)d.cmp=d.days.map((x,i)=>{const w=x.pop>50;return{ecmwf_ifs025:{mx:x.max,mn:x.min,mm:w?5:0},gfs_seamless:{mx:x.max+1+i%2,mn:x.min,mm:w?8:i%2?2:0},icon_seamless:{mx:x.max-1,mn:x.min-1,mm:w?4:0},gem_seamless:{mx:x.max+(i%3)*2,mn:x.min,mm:w?3:0}}});
  if(!d.demo&&CMPC[ck(c)]){d.cmp=CMPC[ck(c)];applyCons(d)}
  render(c,d);
