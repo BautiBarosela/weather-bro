@@ -11,7 +11,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Weather Bro">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<style>html{background:#123f7a}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap"></noscript>
 <style>
 @property --a{syntax:'<color>';inherits:false;initial-value:#1668c8}
 @property --b{syntax:'<color>';inherits:false;initial-value:#5ba8f0}
@@ -333,10 +335,10 @@ img,svg,canvas,a{-webkit-user-drag:none;-webkit-touch-callout:none}
   <p class="note" id="src">Datos: Open-Meteo (modelos GFS, ICON y ECMWF).</p>
 </main>
 <nav id="nav" aria-label="Secciones"></nav>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <div id="ov" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t"><button id="sx" aria-label="Cerrar">✕</button><h3 id="sh-t"></h3><div id="sb"></div></div></div>
 <script>
 const $=s=>document.querySelector(s);
+let LLP=null;const needL=()=>typeof L!=='undefined'?Promise.resolve():(LLP||(LLP=new Promise(res=>{const e=document.createElement('script');e.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';e.onload=res;e.onerror=()=>{LLP=null;res()};document.head.appendChild(e)})));
 const CITIES=[["Buenos Aires",-34.61,-58.38,"Ciudad de Buenos Aires"],["Córdoba",-31.42,-64.18,"Córdoba"],["Rosario",-32.95,-60.64,"Santa Fe"],["Mendoza",-32.89,-68.84,"Mendoza"],["San Miguel de Tucumán",-26.82,-65.22,"Tucumán"],["Salta",-24.78,-65.41,"Salta"],["Mar del Plata",-38.0,-57.55,"Buenos Aires"],["San Carlos de Bariloche",-41.13,-71.31,"Río Negro"],["Ushuaia",-54.8,-68.3,"Tierra del Fuego"],["Neuquén",-38.95,-68.06,"Neuquén"],["Posadas",-27.37,-55.9,"Misiones"],["Resistencia",-27.45,-58.99,"Chaco"]];
 const SKY={clear:['#123f7a','#2a6fc0'],partly:['#1a3f6e','#3f6ea6'],cloud:['#2c3d52','#566a82'],fog:['#3a4654','#6b7886'],drizzle:['#2a3c55','#5b7490'],rain:['#1f2d40','#3f5470'],storm:['#141a28','#2e384e'],snow:['#3c5068','#7d93ab']};
 const NIGHT={clear:['#0b1a33','#18325e'],partly:['#0e1d38','#223a68'],cloud:['#18222f','#2f3f54'],fog:['#222a34','#3e4856'],drizzle:['#141f30','#2a3d57'],rain:['#111a28','#25364d'],storm:['#0a0e17','#1d2538'],snow:['#2b3b50','#566b84']};
@@ -371,7 +373,7 @@ let cur={k:'clear',day:true};
 /* ---------- Fondo animado ---------- */
 const cv=$('#cv'),cx=cv.getContext('2d');let W,H,P=[],clouds=[],stars=[],flash=0,nextBolt=0,bolt=null;
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;let ANIM=true;try{ANIM=localStorage.getItem('wb_anim')!=='0'}catch(e){}let reduce=RM||!ANIM;
-function size(){const r=devicePixelRatio||1;W=innerWidth;H=innerHeight;cv.width=W*r;cv.height=H*r;cx.setTransform(r,0,0,r,0,0)}
+function size(){const r=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*r;cv.height=H*r;cx.setTransform(r,0,0,r,0,0)}
 addEventListener('resize',()=>{size();build()});
 function build(){const {k,day}=cur;P=[];clouds=[];
  const nc={partly:3,cloud:7,drizzle:6,rain:7,storm:8,snow:6}[k]||0;
@@ -507,6 +509,7 @@ const RAD='<div id="tr" hidden><div id="rm"></div><div class="rc"><button id="rp
 const alertR=d=>{const H=d.hours,i=H.findIndex(x=>x.pop>=50),mx=H.reduce((a,b)=>b.pop>a.pop?b:a);return`<p class="al">${i===0?tr('x_a0'):i>0?fm(tr('x_a1'),{h:HF(H[i].h)}):mx.pop>=30?fm(tr('x_a2'),{p:mx.pop,h:HF(mx.h)}):tr('x_a3')}</p>`};
 async function initRadar(){
  const box=$('#rm'),rt=$('#rt'),sl=$('#rs'),pb=$('#rp');
+ await needL();if(!box.isConnected||$('#tr').hidden)return;
  if(typeof L==='undefined'){box.textContent=tr('k_no');return}
  const c=lastC,map=L.map(box,{zoomControl:false,attributionControl:false,minZoom:4,maxZoom:7}).setView([c.lat,c.lon],6);
  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:7}).addTo(map);
@@ -531,8 +534,9 @@ const DIR0=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSO','SO','OSO','O','
 const WCOL=s=>s<12?'#a8dcff':s<28?'#4d9cf5':s<45?'#f2a56b':'#ff7a45';
 const GREL=(g,sp)=>g!=null&&g>=30&&g-sp>=10;
 function wleg(){const b=$('#wlb');if(!b)return;b.innerHTML=[0,12,28,45].map((k,i)=>{const t=WD(k);return'<span>'+(i===3?t.replace(/^(\d+)/,'$1+'):t)+'</span>'}).join('')}
-function initWind(){
+async function initWind(){
  const box=$('#wm'),sl=$('#wh'),ro=$('#wr'),N=7;wleg();
+ await needL();if(!box.isConnected||$('#tw').hidden)return;
  if(typeof L==='undefined'){box.textContent=tr('k_no');return}
  const c=lastC,map=L.map(box,{zoomControl:false,attributionControl:false,minZoom:4,maxZoom:9}).setView([c.lat,c.lon],6);
  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:9}).addTo(map);
