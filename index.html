@@ -273,7 +273,7 @@ main{margin-left:calc(200px + env(safe-area-inset-left,0px))}
 #lang{border-radius:8px;border:1px solid rgba(255,255,255,.3);background:#12233f;color:#fff;padding:9px 12px;font:500 14px 'Inter',system-ui,sans-serif}
 .lk small{display:block;opacity:.7;font-size:12px;margin-top:2px;font-weight:400}
 .ic-clearn{color:#f4efe2}.ic-partlyn{color:#d5deea}.ic-partlyn .a{stroke:#f4efe2}
-html,body{touch-action:pan-x pan-y}
+html,body{touch-action:pan-x pan-y;overscroll-behavior:none}
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea,select{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 img,svg,canvas,a{-webkit-user-drag:none;-webkit-touch-callout:none}
@@ -366,6 +366,7 @@ const CL='<path d="M7 18h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7.1 8.6 4.7 4.7 0 0 
 const ICON={clear:S('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'),partly:S('<g class="a"><circle cx="8" cy="8" r="3"/><path d="M8 2v1M2 8h1M3.8 3.8l.7.7M12.2 3.8l-.7.7"/></g><path d="M9 21h8a3.5 3.5 0 0 0 .5-6.96A4.8 4.8 0 0 0 8.4 14 3.5 3.5 0 0 0 9 21z"/>'),cloud:S(CL),fog:S('<path d="M4 8h16M3 12h18M5 16h14"/>'),drizzle:S(CU+'<path class="a" d="M8 17v1.5M12 17v1.5M16 17v1.5M10 20.5v1M14 20.5v1"/>'),rain:S(CU+'<path class="a" d="M8 17l-1 3M12 17l-1 3M16 17l-1 3"/>'),storm:S(CU+'<path class="a" d="M13 14l-3 4h4l-3 4"/>'),snow:S(CU+'<path class="a" d="M8 18h.01M12 18h.01M16 18h.01M10 21h.01M14 21h.01"/>')};
 const ICN={clear:S('<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'),partly:S('<defs><mask id="mnk"><rect width="24" height="24" fill="#fff"/><path d="M9 21h8a3.5 3.5 0 0 0 .5-6.96A4.8 4.8 0 0 0 8.4 14 3.5 3.5 0 0 0 9 21z" fill="#000" stroke="#000" stroke-width="3.2"/></mask></defs><g class="a" mask="url(#mnk)"><path transform="translate(1.6,2.4) scale(.6)" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></g><path d="M9 21h8a3.5 3.5 0 0 0 .5-6.96A4.8 4.8 0 0 0 8.4 14 3.5 3.5 0 0 0 9 21z"/>')};
 const icH=(k,day)=>(day===false&&ICN[k])||ICON[k],icC=(k,day)=>'ic-'+k+(day===false&&ICN[k]?'n':'');
+const fixC=(c,mm,cl)=>{if(mm==null)return c;const dz=c>=51&&c<=57,rn=(c>=61&&c<=67)||(c>=80&&c<=82);return(dz&&mm<.1)||(rn&&mm<.3)?(cl==null||cl>=60?3:cl<20?0:2):c};
 function kind(c){if(c===0)return'clear';if(c<=2)return'partly';if(c===3)return'cloud';if(c<=48)return'fog';if(c<=57)return'drizzle';if(c<=67||(c>=80&&c<=82))return'rain';if(c<=77||c===85||c===86)return'snow';return'storm'}
 const CODE={clear:0,partly:2,cloud:3,fog:45,drizzle:53,rain:61,storm:95,snow:73};
 let cur={k:'clear',day:true};
@@ -400,7 +401,7 @@ function frame(t){cx.clearRect(0,0,W,H);const {k,day}=cur;
   if(flash>0){cx.fillStyle=`rgba(255,255,255,${flash*.35})`;cx.fillRect(0,0,W,H);if(bolt){cx.strokeStyle=`rgba(255,250,210,${flash})`;cx.lineWidth=3;cx.beginPath();bolt.forEach((p,i)=>i?cx.lineTo(...p):cx.moveTo(...p));cx.stroke()}flash-=.04}}
  if(!reduce)requestAnimationFrame(frame)}
 let started=false;
-function setSky(k,day){cur={k,day};const [a,b]=(day?SKY:NIGHT)[k];document.body.style.setProperty('--a',a);document.body.style.setProperty('--b',b);build();if(reduce){frame(0)}else if(!started){started=true;requestAnimationFrame(frame)}}
+function setSky(k,day){cur={k,day};const [a,b]=(day?SKY:NIGHT)[k];document.body.style.setProperty('--a',a);document.body.style.setProperty('--b',b);document.documentElement.style.background=a;build();if(reduce){frame(0)}else if(!started){started=true;requestAnimationFrame(frame)}}
 
 /* ---------- Datos ---------- */
 const norm=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
@@ -429,11 +430,11 @@ function demoData(lat,k){const base=Math.round(27-(Math.abs(lat)-25)*.6),seq=['p
   hours:Array.from({length:24},(_,i)=>({h:(h0+i+1)%24,code:CODE[k||'clear'],t:base+4*Math.sin((h0+i-9)/24*6.28),pop:k==='rain'?70:10,w:10+(i%7)*3,uv:Math.max(0,Math.round(8*Math.sin((((h0+i+1)%24)-6)/12*Math.PI))),f:base+4*Math.sin((h0+i-9)/24*6.28)-1,mm:k==='rain'?1:0,day:((h0+i+1)%24)>=6&&((h0+i+1)%24)<19})),
   days:[0,1,2,3,4,5,6].map(i=>{const kk=seq[(i+Math.round(Math.abs(lat)))%4];return{date:new Date(Date.now()+i*864e5),code:CODE[kk],max:base+3-i%4,min:base-7+i%4,pop:kk==='rain'?70:kk==='cloud'?25:5,wind:20+i*3,gust:35+i*3,mm:kk==='rain'?6:0,uv:7-i%3}})}}
 async function load(c,fk){LU=Date.now();let d;try{localStorage.setItem('wb_lastc',JSON.stringify(c))}catch(e){}
- try{const j=await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,wind_direction_10m,weather_code,is_day,pressure_msl,uv_index&hourly=temperature_2m,precipitation_probability,weather_code,visibility,wind_speed_10m,uv_index,apparent_temperature,precipitation,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max&timezone=auto&forecast_days=7`);
+ try{const j=await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,wind_direction_10m,weather_code,is_day,pressure_msl,uv_index,precipitation,cloud_cover&hourly=cloud_cover,temperature_2m,precipitation_probability,weather_code,visibility,wind_speed_10m,uv_index,apparent_temperature,precipitation,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max&timezone=auto&forecast_days=7`);
   const H=j.hourly,D=j.daily,C=j.current,i=Math.max(0,H.time.findIndex(t=>t>C.time)-1);
   const tdy=D.time[0];let um=-1,uvh=null;H.time.forEach((t,n)=>{if(t.startsWith(tdy)&&H.uv_index[n]>um){um=H.uv_index[n];uvh=+t.slice(11,13)}});
-  d={demo:false,tz:j.timezone,temp:C.temperature_2m,feel:C.apparent_temperature,wind:C.wind_speed_10m,gust:C.wind_gusts_10m,wdir:C.wind_direction_10m,hum:C.relative_humidity_2m,code:C.weather_code,day:!!C.is_day,uv:C.uv_index!=null?C.uv_index:D.uv_index_max[0],uvm:D.uv_index_max[0],uvh:uvh,pres:C.pressure_msl,vis:H.visibility[i],sr:D.sunrise[0].slice(11,16),ss:D.sunset[0].slice(11,16),rain:D.precipitation_sum[0],
-   hours:H.time.slice(i+1,i+25).map((t,n)=>({h:+t.slice(11,13),code:H.weather_code[i+1+n],t:H.temperature_2m[i+1+n],pop:H.precipitation_probability[i+1+n]||0,w:H.wind_speed_10m[i+1+n],uv:H.uv_index[i+1+n],f:H.apparent_temperature[i+1+n],mm:H.precipitation[i+1+n],day:!!H.is_day[i+1+n]})),
+  d={demo:false,tz:j.timezone,temp:C.temperature_2m,feel:C.apparent_temperature,wind:C.wind_speed_10m,gust:C.wind_gusts_10m,wdir:C.wind_direction_10m,hum:C.relative_humidity_2m,code:fixC(C.weather_code,C.precipitation,C.cloud_cover),day:!!C.is_day,uv:C.uv_index!=null?C.uv_index:D.uv_index_max[0],uvm:D.uv_index_max[0],uvh:uvh,pres:C.pressure_msl,vis:H.visibility[i],sr:D.sunrise[0].slice(11,16),ss:D.sunset[0].slice(11,16),rain:D.precipitation_sum[0],
+   hours:H.time.slice(i+1,i+25).map((t,n)=>({h:+t.slice(11,13),code:fixC(H.weather_code[i+1+n],H.precipitation[i+1+n],H.cloud_cover&&H.cloud_cover[i+1+n]),t:H.temperature_2m[i+1+n],pop:H.precipitation_probability[i+1+n]||0,w:H.wind_speed_10m[i+1+n],uv:H.uv_index[i+1+n],f:H.apparent_temperature[i+1+n],mm:H.precipitation[i+1+n],day:!!H.is_day[i+1+n]})),
    days:D.time.map((_,n)=>({date:new Date(D.time[n]+'T12:00'),code:D.weather_code[n],max:D.temperature_2m_max[n],min:D.temperature_2m_min[n],pop:D.precipitation_probability_max[n]||0,wind:D.wind_speed_10m_max[n],gust:D.wind_gusts_10m_max[n],mm:D.precipitation_sum[n],uv:D.uv_index_max[n]}))}}
  catch(e){d=null}
  if(d){try{localStorage.setItem('wb_last',JSON.stringify({n:c.name,t:Date.now(),d}))}catch(e){}}
