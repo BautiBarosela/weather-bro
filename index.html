@@ -478,10 +478,14 @@ $('#star').onclick=()=>{MAIN=lastC.gps?{loc:1}:{name:lastC.name,region:lastC.reg
 const sv=()=>{try{localStorage.setItem('wb_u',JSON.stringify(U))}catch(e){}render(lastC,lastD)};
 $('#uT').onclick=()=>{U.t=U.t==='C'?'F':'C';sv()};
 $('#uW').onclick=()=>{U.w={kmh:'kn',kn:'ms',ms:'mph',mph:'kmh'}[U.w];sv()};
-$('#loc').onclick=()=>{if(!navigator.geolocation)return note(tr('n_nogeo'));note(tr('n_find'));
- navigator.geolocation.getCurrentPosition(async p=>{const c={name:tr('locb'),region:'',lat:p.coords.latitude,lon:p.coords.longitude,gps:1};
+const kmD=(a,b)=>{const r=Math.PI/180,x=(b.lat-a.lat)*r,y=(b.lon-a.lon)*r,h=Math.sin(x/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(y/2)**2;return 12742*Math.asin(Math.sqrt(h))};
+function locate(m){if(!navigator.geolocation)return m===0?note(tr('n_nogeo')):0;
+ navigator.geolocation.getCurrentPosition(async p=>{try{localStorage.setItem('wb_gpsok','1')}catch(e){}
+  const c={name:tr('locb'),region:'',lat:p.coords.latitude,lon:p.coords.longitude,gps:1};
+  if(m&&city&&city.gps&&kmD(city,c)<8){if(m===1)load(city);return}
   try{const j=await getJSON(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${c.lat}&longitude=${c.lon}&localityLanguage=${LOC().slice(0,2)}`);c.name=j.city||j.locality||c.name;c.region=[j.principalSubdivision,j.countryName].filter(Boolean).join(', ');c.cc=j.countryCode}catch(e){}
-  city=c;load(c)},e=>note(tr(e&&e.code===2?'n_gpos':e&&e.code===3?'n_gto':'n_deny')),{timeout:15000,maximumAge:0})};
+  city=c;load(c)},e=>{if(m===0)note(tr(e&&e.code===2?'n_gpos':e&&e.code===3?'n_gto':'n_deny'));else if(m===1&&lastC)load(lastC)},{timeout:15000,maximumAge:m===2?120000:0})}
+$('#loc').onclick=()=>{if(!navigator.geolocation)return note(tr('n_nogeo'));note(tr('n_find'));locate(0)};
 $('#rst').onclick=()=>{['wb_lastc','wb_last','wb_ct'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});LC=null;try{Object.keys(CT).forEach(k=>delete CT[k])}catch(e){}goV('hoy');$('#loc').click()};
 $('#chips').innerHTML=Object.keys(NAME).map(k=>`<button data-k="${k}">${ICON[k]} ${NAME[k]}</button>`).join('')+'<button data-k="night">'+tr('n_nt')+'</button>';
 let LC=null;try{LC=JSON.parse(localStorage.getItem('wb_lastc'))}catch(e){}
@@ -675,7 +679,8 @@ function applyLang(){animUI();[['#q','srch'],['#city','c_t'],['#wh','k_wa'],['#r
 $('#lang').innerHTML='<option value="auto">Automático / Auto</option>'+Object.keys(LGN).map(k=>`<option value="${k}">${LGN[k]}</option>`).join('');$('#lang').value=D[LP]?LP:'auto';
 $('#lang').onchange=e=>{LP=e.target.value;try{localStorage.setItem('wb_lang',LP)}catch(x){}CUR=D[LP]||D[pickL(navigator.language)];applyLang()};
 async function askLoc(){if(!navigator.geolocation)return;let st='prompt';try{st=(await navigator.permissions.query({name:'geolocation'})).state}catch(e){}
- if(st==='granted'){$('#loc').click();return}if(st==='denied')return;
+ if(st==='granted'){locate(2);return}if(st==='denied')return;
+ try{if(localStorage.getItem('wb_gpsok')){locate(2);return}}catch(e){}
  try{if(localStorage.getItem('wb_lp'))return;localStorage.setItem('wb_lp','1')}catch(e){}
  lf=$('#city');$('#sh-t').textContent=tr('lp_t');$('#sb').innerHTML=`<p>${tr('lp_b')}</p><button class="go" id="lpy">${tr('lp_y')}</button> <button class="go" id="lpn" style="background:none;color:#fff;border:1px solid rgba(255,255,255,.35)">${tr('lp_n')}</button>`;ov.hidden=false;$('#lpy').focus()}
 $('#sb').addEventListener('click',e=>{if(e.target.id==='lpy'){closeSheet();$('#loc').click()}else if(e.target.id==='lpn')closeSheet()});
@@ -785,8 +790,8 @@ $('#v-agro').onclick=e=>{
 let LU=0;const REF=15*60e3;
 function refresh(force){if(!lastC||document.hidden)return;const age=Date.now()-LU;if(!force&&age<REF)return;
  try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update())}catch(e){}
- if(lastC.gps&&age>2*REF)$('#loc').click();else load(lastC)}
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh(false)});
+ if(lastC.gps&&(!MAIN||MAIN.loc))locate(1);else load(lastC)}
+let HT=0;document.addEventListener('visibilitychange',()=>{if(document.hidden){HT=Date.now();return}const away=HT?Date.now()-HT:0;HT=0;if(away>=6e5&&lastC&&lastC.gps&&(!MAIN||MAIN.loc)){LU=Date.now();locate(1)}else refresh(false)});
 addEventListener('offline',()=>{if(lastD&&!lastD.demo)bnShow('off',LOK||Date.now())});addEventListener('online',()=>refresh(true));addEventListener('pageshow',e=>{if(e.persisted)refresh(false)});
 setInterval(()=>refresh(false),60e3);
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
